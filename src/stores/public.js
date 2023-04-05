@@ -3,19 +3,20 @@ import { useRoute } from "vue-router";
 
 export const usePageStore = defineStore("page", {
   state: () => ({
-    isAsideVisible: true,
+    isCollapse: false,
     route: useRoute(),
     countdown: 0,
   }),
   getters: {
     getCurrentPath: (state) => {
-      const currentPath = state.route.path.split("/").filter((path) => path !== "");
-      return currentPath.map((path) => {
-        const matchedRoute = state.route.matched.find((route) => route.path === "/" + path);
+      const matchedRoute = state.route.matched;
+      return matchedRoute.map((route) => {
         return {
-          path: "/" + path,
-          title: matchedRoute ? matchedRoute.meta.title : "",
+          name: route.name,
+          title: route.meta.title,
         };
+      }).filter((route) => {
+        return route.name !== "index"&&route.name !== "home";
       });
     },
   },

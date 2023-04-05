@@ -5,27 +5,17 @@
         <!-- 系统公告 -->
         <div style="text-align: center">
           <h3>家庭资产管家</h3>
-          <el-collapse v-model="activeNames">
-            <el-collapse-item name="1">
-              <template #title>
-                <span class="notice">系统公告</span>
-              </template>
-              <el-table :data="noticeTable">
-                <el-table-column label="公告标题" prop="title"></el-table-column>
-                <el-table-column label="公告内容" prop="content"></el-table-column>
-                <el-table-column label="发布时间" prop="date"></el-table-column>
-              </el-table>
-            </el-collapse-item>
-          </el-collapse>
+          <!-- 简介 -->
+          <p style="color: gray;font-size: .5rem;">一款基于Vue3 + Element Plus + Echarts + Spring Boot的家庭资产管理系统</p>
         </div>
       </el-col>
     </el-row>
     <el-row>
       <!-- 收支图 -->
-      <el-col :span="14" style="height: 300px">
+      <el-col :span="14" :xs="24" style="height: 300px">
         <div ref="chart"></div>
       </el-col>
-      <el-col :span="10">
+      <el-col :span="10" :xs="24">
         <div>
           <el-row>
             <el-col :span="12">
@@ -45,6 +35,7 @@
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                style="width: 100%"
               ></el-date-picker>
             </el-col>
           </el-row>
@@ -74,19 +65,12 @@ const date = ref();
 
 const chart = ref();
 
-const noticeTable = ref();
-
-const activeNames = ref(["1"]);
-
 const myChart = computed(() => {
   return echarts.init(chart.value);
 });
 
 const renderChart = () => {
   const option = {
-    title: {
-      text: "支出和收入对比",
-    },
     tooltip: {
       trigger: "axis",
       axisPointer: {
@@ -151,34 +135,48 @@ onMounted(() => {
 
   // 监听容器尺寸变化，重绘图表
   const resizeObserver = new ResizeObserver(() => {
-    myChart.value.resize();
+      myChart.value.resize();
   });
   resizeObserver.observe(chart.value);
-
   onBeforeUnmount(() => {
     resizeObserver.disconnect();
-  });
-
-  window.addEventListener("resize", () => {
-    myChart.value.resize();
   });
 });
 </script>
 <style scoped lang="scss">
 #container {
   .el-row {
-    margin-bottom: 2em;
+    margin-bottom: 1em;
     &:last-child {
       margin-bottom: 0;
     }
     .el-col {
       padding: 0px 10px;
+      margin-bottom: 1em;
       & > div {
         height: 100%;
         padding: 0.5em;
-        box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px,
-          rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+        box-shadow: rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
         border-radius: 0.3em;
+      }
+    }
+  }
+
+  h3 {
+    @import url("https://fonts.googleapis.com/css2?family=Long+Cang&display=swap");
+    font-family: "Long Cang", cursive;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 10px #dc1423;
+    text-align: center;
+    animation: animate 3s 0.5s linear infinite;
+    @keyframes animate {
+      from {
+        // filter: hue-rotate(0deg);是css3的滤镜属性，可以改变元素的颜色，hue-rotate(0deg)表示不改变颜色
+        filter: hue-rotate(0deg);
+      }
+      to {
+        filter: hue-rotate(360deg);
       }
     }
   }

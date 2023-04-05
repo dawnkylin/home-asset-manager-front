@@ -1,9 +1,10 @@
 /**
  * 存储localStorage
  */
-export const setStore = (name, content) => {
+export const setLocalStorage = (name, content) => {
   if (!name) return;
   if (typeof content !== "string") {
+    // 如果content不是字符串，将其转换为字符串
     content = JSON.stringify(content);
   }
   localStorage.setItem(name, content);
@@ -12,9 +13,10 @@ export const setStore = (name, content) => {
 /**
  * 获取localStorage
  */
-export const getStore = (name) => {
+export const getLocalStorage = (name) => {
   if (!name) return;
   try {
+    // 尝试将localStorage中的内容转换为JSON对象
     const t = JSON.parse(localStorage.getItem(name));
     return t;
   } catch (e) {
@@ -25,7 +27,7 @@ export const getStore = (name) => {
 /**
  * 删除localStorage
  */
-export const removeStore = (name) => {
+export const removeLocalStorage = (name) => {
   if (!name) return;
   localStorage.removeItem(name);
 };

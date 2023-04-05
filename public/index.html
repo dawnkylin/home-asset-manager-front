@@ -7,26 +7,30 @@
     <link rel="icon" href="<%= PUBLIC_PATH %>favicon.ico" />
     <title><%= VUE_APP_TITLE %></title>
     <style>
-      *,
-      :after,
-      :before {
-        box-sizing: inherit;
-      }
-      html {
+      :root {
         box-sizing: border-box;
       }
-      body {
-        margin: 0;
+
+      *,
+      ::before,
+      ::after {
+        /*强制继承*/
+        box-sizing: inherit;
       }
+
       #app,
       html,
       body {
         height: 100%;
+        margin: 0;
+        padding: 0;
       }
+
       #app {
-        background-color: #f0f2f5;
+        display: flex;
         overflow: hidden;
       }
+
       /* Absolute Center Spinner */
       .loading {
         position: fixed;
@@ -62,11 +66,9 @@
         margin-top: -0.5em;
         animation: spinner 1500ms infinite linear;
         border-radius: 0.5em;
-        box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0,
-          rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) 0 1.5em 0 0,
-          rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) -1.5em 0 0 0,
-          rgba(0, 0, 0, 0.75) -1.1em -1.1em 0 0,
-          rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
+        box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0, rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0,
+          rgba(0, 0, 0, 0.75) 0 1.5em 0 0, rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) -1.5em 0 0 0,
+          rgba(0, 0, 0, 0.75) -1.1em -1.1em 0 0, rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
       }
 
       /* Animation */
@@ -83,20 +85,19 @@
   </head>
   <body>
     <div id="app"></div>
+    <!-- built files will be auto injected -->
     <div class="loading"></div>
     <script>
       // 浏览器已完全加载 HTML，并构建了 DOM 树，但像 <img> 和样式表之类的外部资源可能尚未加载完成。
       window.addEventListener("DOMContentLoaded", () => {
-        document
-          .getElementsByClassName("loading")[0]
-          .classList.remove("loading");
+        document.getElementsByClassName("loading")[0].classList.remove("loading");
       });
 
-      const appNode = document.querySelector("#app");
-      appNode.addEventListener("wheel", function (event) {
-        appNode.scrollTop += event.deltaY;
-        event.preventDefault();
-      });
+      // const appNode = document.querySelector("#app");
+      // appNode.addEventListener("wheel", function (event) {
+      //   appNode.scrollTop += event.deltaY;
+      //   event.preventDefault();
+      // });
     </script>
   </body>
 </html>

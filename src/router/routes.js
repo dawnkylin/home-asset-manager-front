@@ -1,4 +1,4 @@
-import {Index} from '@views/index'
+const Index = () => import("@views/index");
 
 export default [
   // 首页
@@ -6,17 +6,16 @@ export default [
     path: "/",
     name: "index",
     redirect: "/home",
-    component: () => import("@/src/views/index"),
-    meta: { requiresAuth: true },
+    component: Index,
     children: [
       {
-        path: "/home",
+        path: "home",
         name: "home",
-        component: () => Index,
-        meta: { requiresAuth: true, title: "主页" },
+        component: () => import("@views/home"),
+        meta: { requiresAuth: true, title: "首页" },
       },
       {
-        path: "/about",
+        path: "about",
         name: "about",
         component: () => import("@views/about"),
         meta: { requiresAuth: true, title: "关于" },
@@ -30,30 +29,61 @@ export default [
     component: () => import("@views/login"),
     meta: { guestOnly: true, title: "登录" },
   },
-  // 管理
+  // 注册
   {
-    path: "/manage",
+    path: "/register",
+    name: "register",
+    component: () => import("@views/register"),
+    meta: { guestOnly: true, title: "注册" },
+  },
+  // 资产
+  {
+    path: "/asset",
+    name: "asset",
     component: Index,
+    redirect: "/asset/fixedasset",
+    meta: { requiresAuth: true, title: "资产" },
     children: [
       {
-        path: "/manage/asset",
-        name: "asset",
+        path: "fixedasset",
+        name: "fixedAsset",
         component: () => import("@views/asset"),
-        meta: { requiresAuth: true, title: "资产" },
+        meta: { requiresAuth: true, title: "固定资产", type: "fixed" },
       },
       {
-        path: "/manage/finance",
-        name: "finance",
-        component: () => import("@views/finance"),
-        meta: { requiresAuth: true, title: "财务记录" },
-      },
-      {
-        path: "/manage/assettype",
-        name: "assettype",
-        component: () => import("@views/assettype"),
-        meta: { requiresAuth: true, title: "资产类型",roles:['admin'] },
+        path: "fluidasset",
+        name: "fluidAsset",
+        component: () => import("@views/asset"),
+        meta: { requiresAuth: true, title: "流动资产", type: "fluid" },
       },
     ],
+  },
+  {
+    path: "/finance",
+    name: "finance",
+    component: Index,
+    redirect: "/income",
+    meta: { requiresAuth: true, title: "财务记录" },
+    children: [
+      {
+        path: "income",
+        name: "income",
+        component: () => import("@views/finance"),
+        meta: { requiresAuth: true, title: "收入", type: "income" },
+      },
+      {
+        path: "expenditure",
+        name: "expenditure",
+        component: () => import("@views/finance"),
+        meta: { requiresAuth: true, title: "支出", type: "expenditure" },
+      },
+    ],
+  },
+  {
+    path: "/assettype",
+    name: "assettype",
+    component: () => import("@views/assettype"),
+    meta: { requiresAuth: true, title: "资产类型", roles: ["admin"] },
   },
   // 个人中心
   // 错误页面
