@@ -24,9 +24,18 @@
   <!-- el-drawer添加opened事件 -->
   <el-drawer v-model="drawer" title="系统公告" :size="drawerSize" @opened="drawerOpened">
     <template #default>
-      <el-table :data="noticeData" stripe>
-        <el-table-column prop="content" label="内容" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="date" label="发布时间" show-overflow-tooltip></el-table-column>
+      <el-table :data="noticeData">
+        <el-table-column prop="title" type="expand" show-overflow-tooltip min-width="30px">
+          <template #default="{ row }">
+            <el-row>
+              <el-col :span="24">
+                <span>{{ row.content }}</span>
+              </el-col>
+            </el-row>
+          </template>
+        </el-table-column>
+        <el-table-column prop="date" label="发布时间" sortable show-overflow-tooltip min-width="150px">
+        </el-table-column>
       </el-table>
     </template>
   </el-drawer>
@@ -90,7 +99,7 @@ aside {
 /* 右侧main */
 .main {
   height: 100%;
-  flex: 1;
+  flex: 2;
   /* main的header */
   header {
     height: 50px;
@@ -98,7 +107,8 @@ aside {
     box-shadow: 0px 2px 10px rgba(#000, 0.5);
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: space-between;
+    padding: 0 1rem;
     background-color: #f0f2f5;
   }
   /* main的section */
@@ -112,6 +122,6 @@ aside {
   right: 0;
   top: 70%;
   cursor: pointer;
-  z-index: 1;
+  z-index: 2;
 }
 </style>

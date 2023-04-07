@@ -108,6 +108,10 @@ const sendSms = () => {
           if (res.code === 200) {
             ElMessage.success("验证码发送成功");
           }
+          // 手机号不存在
+          else if (res.code === 1007) {
+            ElMessage.error("手机号不存在");
+          }
         })
         .catch((err) => {
           ElMessage.error("验证码发送失败：" + err);

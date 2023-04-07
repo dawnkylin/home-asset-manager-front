@@ -6,7 +6,7 @@
         <div style="text-align: center">
           <h3>家庭资产管家</h3>
           <!-- 简介 -->
-          <p style="color: gray;font-size: .5rem;">一款基于Vue3 + Element Plus + Echarts + Spring Boot的家庭资产管理系统</p>
+          <p style="color: gray;font-size: .8rem;">一款基于Vue3 + Element Plus + Echarts + Spring Boot的家庭资产管理系统</p>
         </div>
       </el-col>
     </el-row>
@@ -144,6 +144,7 @@ onMounted(() => {
 });
 </script>
 <style scoped lang="scss">
+@import url("https://fonts.googleapis.com/css2?family=Long+Cang&display=swap");
 #container {
   .el-row {
     margin-bottom: 1em;
@@ -163,7 +164,6 @@ onMounted(() => {
   }
 
   h3 {
-    @import url("https://fonts.googleapis.com/css2?family=Long+Cang&display=swap");
     font-family: "Long Cang", cursive;
     font-size: 2rem;
     margin-bottom: 1rem;
