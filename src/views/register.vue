@@ -22,7 +22,8 @@
               show-word-limit></el-input>
           </el-col>
           <el-col :span="9">
-            <el-button type="info" @click="sendSms">获取验证码</el-button>
+            <!-- 60s倒计时 -->
+            <el-button type="info" :disabled="isDisabled" @click="sendSms">{{ btnText }}</el-button>
           </el-col>
         </el-row>
       </el-form-item>
@@ -54,6 +55,9 @@ import axios from "@utils/request";
 import { ElMessage } from "element-plus";
 
 const router = useRouter();
+
+const isDisabled = ref(false);
+const btnText = ref("获取验证码");
 
 // 表单数据
 const form = reactive({
@@ -101,12 +105,25 @@ const sendSms = () => {
   formRef.value.validateField("phone", (valid) => {
     if (valid) {
       // 发送验证码请求
+      isDisabled.value = true;
       axios
         .postRequest("/auth/sendSms?phone="+ form.phone)
         .then((res) => {
           // 发送成功
           if (res.code === 200) {
             ElMessage.success("验证码发送成功");
+            // 60s倒计时
+            let count = 60;
+            const timer = setInterval(() => {
+              if (count > 0 && count <= 60) {
+                count--;
+                btnText.value = count + "s";
+              } else {
+                clearInterval(timer);
+                btnText.value = "获取验证码";
+                isDisabled.value = false;
+              }
+            }, 1000);
           }
           // 手机号不存在
           else if (res.code === 1007) {

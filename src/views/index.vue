@@ -44,7 +44,7 @@
     <my-aside></my-aside>
   </aside>
   <!-- 主体 -->
-  <el-scrollbar class="main">
+  <el-scrollbar class="main" view-style="height:100%">
     <!-- 头部 -->
     <header>
       <my-header></my-header>
@@ -113,7 +113,7 @@ aside {
   }
   /* main的section */
   section {
-    min-height: calc(100% - 50px);
+    height: calc(100% - 50px);
   }
 }
 

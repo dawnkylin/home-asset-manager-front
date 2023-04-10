@@ -11,12 +11,12 @@
           show-password></el-input>
       </el-form-item>
       <el-form-item>
-        <button1 @click="onSubmit">登录</button1>
+        <button1 @click.prevent="onSubmit">登录</button1>
       </el-form-item>
       <!-- 去注册 -->
       <el-form-item>
         还没有账号？
-        <el-link @click="router.push({ name: 'register' })">去注册</el-link>
+        <el-link @click.prevent="router.push({ name: 'register' })">去注册</el-link>
       </el-form-item>
     </el-form>
   </div>
@@ -84,13 +84,14 @@ const onSubmit = () => {
           // 登录成功
           if (res.code === 200) {
             authStore.login(res.data.token, res.data.user);
-            // 检查是否有重定向地址
+            //检查是否有重定向地址
             const redirect = router.currentRoute.value.query.redirect;
             if (redirect) {
               router.push({ path: redirect });
             } else {
               router.push({ path: "/" });
             }
+            router.push({ path: "/" });
           }
           // 用户名或密码错误
           else if (res.code === 1006) {

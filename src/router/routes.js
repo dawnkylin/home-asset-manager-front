@@ -42,7 +42,7 @@ export default [
     name: "asset",
     component: Index,
     redirect: "/asset/fixedasset",
-    meta: { requiresAuth: true, title: "资产" },
+    meta: { requiresAuth: true, title: "资产", type: "fixed" },
     children: [
       {
         path: "fixedasset",

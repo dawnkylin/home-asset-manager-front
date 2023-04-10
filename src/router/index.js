@@ -20,7 +20,6 @@ router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     // 没登录就跳去登录页面
     axios.getRequest("/auth/isLogin").then((res) => {
-      console.log(res.success);
       if (!res.success) {
         next({ name: "login" });
       } else {
