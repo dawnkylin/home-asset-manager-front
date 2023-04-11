@@ -24,7 +24,7 @@
     </span>
     <template #dropdown>
       <el-dropdown-menu>
-        <el-dropdown-item command="person">个人中心</el-dropdown-item>
+        <el-dropdown-item command="profile">个人中心</el-dropdown-item>
         <el-dropdown-item command="home">首页</el-dropdown-item>
         <el-dropdown-item command="about">关于</el-dropdown-item>
         <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
@@ -53,8 +53,8 @@ const toggleAside = () => {
 // 点击头像，展开或收起下拉菜单，点击下拉菜单的选项，跳转到相应页面
 const handleCommand = (command) => {
   switch (command) {
-    case "person":
-      router.push({ name: "home" });
+    case "profile":
+      router.push({ name: "profile" });
       break;
     case "home":
       router.push({ path: "/home" });

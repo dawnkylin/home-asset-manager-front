@@ -8,17 +8,26 @@ export default [
     redirect: "/home",
     component: Index,
     children: [
+      // 首页
       {
         path: "home",
         name: "home",
         component: () => import("@views/home"),
         meta: { requiresAuth: true, title: "首页" },
       },
+      // 关于
       {
         path: "about",
         name: "about",
         component: () => import("@views/about"),
         meta: { requiresAuth: true, title: "关于" },
+      },
+      // 个人中心
+      {
+        path: "profile",
+        name: "profile",
+        component: () => import("@views/profile"),
+        meta: { requiresAuth: true, title: "个人中心" },
       },
     ],
   },
@@ -85,6 +94,5 @@ export default [
     component: () => import("@views/assettype"),
     meta: { requiresAuth: true, title: "资产类型", roles: ["admin"] },
   },
-  // 个人中心
   // 错误页面
 ];
