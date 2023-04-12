@@ -59,6 +59,7 @@
       <el-table-column prop="purchasePrice" label="购买价格" sortable show-overflow-tooltip width="120"></el-table-column>
       <el-table-column prop="purchaseDate" label="购买日期" sortable show-overflow-tooltip width="150"></el-table-column>
       <el-table-column prop="currentValue" label="当前价值" sortable show-overflow-tooltip width=120></el-table-column>
+      <el-table-column prop="userName" label="创建者" show-overflow-tooltip width="100"></el-table-column>
       <el-table-column prop="notes" label="备注" show-overflow-tooltip min-width="100"></el-table-column>
       <el-table-column label="操作" show-overflow-tooltip width="220">
         <template #default="{ row }">
@@ -567,8 +568,12 @@ const type = ref(route.meta.type);
 // 获取表格数据
 const getTableData = () => {
   axios.getRequest(
-    '/asset/getAssetList/' + getLocalStorage("user").id + '?pageNum=' + currentPage.value +
-    '&pageSize=' + pageSize.value + '&searchType=' + searchType.value + '&searchValue=' + search.value +
+    '/asset/getAssetList' + '?userId=' + getLocalStorage("user").id +
+    '&homeSerialNumber=' + getLocalStorage("user").homeSerialNumber +
+    '&pageNum=' + currentPage.value +
+    '&pageSize=' + pageSize.value +
+    '&searchType=' + searchType.value +
+    '&searchValue=' + search.value +
     '&type=' + type.value
   ).then((res) => {
     tableData.value = res.data.list;

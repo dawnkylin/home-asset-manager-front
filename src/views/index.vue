@@ -34,7 +34,7 @@
             </el-row>
           </template>
         </el-table-column>
-        <el-table-column prop="date" label="发布时间" sortable show-overflow-tooltip min-width="150px">
+        <el-table-column prop="createdDate" label="发布时间" sortable show-overflow-tooltip min-width="150px">
         </el-table-column>
       </el-table>
     </template>

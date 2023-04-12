@@ -168,6 +168,24 @@ const getExpenseData = async () => {
   expenseData.value = res.data;
 };
 
+const fixedData = ref([]);
+
+const getFixedData = async () => {
+  const res = await axios.getRequest("/asset/analyseFixedAsset" +
+    "?userId=" + getLocalStorage("user").id +
+    "&homeSerialNumber=" + getLocalStorage("user").homeSerialNumber);
+  fixedData.value = res.data;
+};
+
+const fluidData = ref([]);
+
+const getFluidData = async () => {
+  const res = await axios.getRequest("/asset/analyseFluidAsset" +
+    "?userId=" + getLocalStorage("user").id +
+    "&homeSerialNumber=" + getLocalStorage("user").homeSerialNumber);
+  fluidData.value = res.data;
+};
+
 // 使用折线图，并标识最大值，最小值，平均值
 const renderChart1 = () => {
   const option = {
@@ -295,7 +313,6 @@ const renderChart2 = () => {
     title: {
       text: "固定资产",
       left: "center",
-      top: 20,
     },
     tooltip: {
       trigger: "item",
@@ -304,25 +321,62 @@ const renderChart2 = () => {
     legend: {
       orient: "vertical",
       left: "left",
-      data: ["房产", "车辆","", "其他"],
+      data: ["房产", "车辆", "金融资产", "家居用品", "电子产品", "其他"],
+    },
+    // 工具栏
+    toolbox: {
+      // 显示工具栏
+      show: true,
+      // 工具栏配置
+      feature: {
+        // 数据视图
+        dataView: {
+          // 是否显示
+          show: true,
+          // 读写模式
+          readOnly: false,
+        },
+        // 保存为图片
+        saveAsImage: {
+          // 是否显示
+          show: true,
+        },
+        // 还原
+        restore: {
+          // 是否显示
+          show: true,
+        },
+      },
     },
     series: [
       {
         name: "固定资产",
         type: "pie",
-        radius: "55%",
-        center: ["50%", "60%"],
-        data: [
-          { value: 335, name: "房产" },
-          { value: 310, name: "车辆" },
-          { value: 234, name: "其他" },
-        ],
+        // 允许标签重叠
+        avoidLabelOverlap: false,
+        // 饼图的半径
+        radius: '60%',
+        center: ['50%', '60%'],
+        data: fixedData.value,
+        // 饼图的标签
+        label: {
+          show: true,
+          position: 'outside'
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: 20,
+            fontWeight: 'bold'
+          }
+        },
+        labelLine: {
+          show: true
+        },
         itemStyle: {
-          emphasis: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: "rgba(0, 0, 0, 0.5)",
-          },
+          borderRadius: 10,
+          borderColor: '#fff',
+          borderWidth: 2,
         },
       },
     ],
@@ -334,7 +388,6 @@ const renderChart3 = () => {
     title: {
       text: "流动资产",
       left: "center",
-      top: 20,
     },
     tooltip: {
       trigger: "item",
@@ -343,26 +396,44 @@ const renderChart3 = () => {
     legend: {
       orient: "vertical",
       left: "left",
-      data: ["现金", "银行卡", "其他"],
+      data: ["生活用品", "教育", "旅游", "医疗", "其他"],
+    },
+    // 工具栏
+    toolbox: {
+      // 显示工具栏
+      show: true,
+      // 工具栏配置
+      feature: {
+        // 数据视图
+        dataView: {
+          // 是否显示
+          show: true,
+          // 读写模式
+          readOnly: false,
+        },
+        // 保存为图片
+        saveAsImage: {
+          // 是否显示
+          show: true,
+        },
+        // 还原
+        restore: {
+          // 是否显示
+          show: true,
+        },
+      },
     },
     series: [
       {
         name: "流动资产",
         type: "pie",
-        radius: "55%",
-        center: ["50%", "60%"],
-        data: [
-          { value: 335, name: "现金" },
-          { value: 310, name: "银行卡" },
-          { value: 234, name: "其他" },
-        ],
+        radius: ['20%', '70%'],
+        center: ['50%', '60%'],
+        roseType: 'area',
         itemStyle: {
-          emphasis: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: "rgba(0, 0, 0, 0.5)",
-          },
+          borderRadius: 8,
         },
+        data: fluidData.value,
       },
     ],
   };
@@ -374,9 +445,12 @@ onMounted(() => {
   // 等请求数据getIncomeData、getExpenseData完成再渲染图表
   Promise.all([getIncomeData(), getExpenseData()]).then(() => {
     renderChart1();
+  });
+  Promise.all([getFixedData(), getFluidData()]).then(() => {
     renderChart2();
     renderChart3();
   });
+
 
   // 监听容器尺寸变化，重绘图表
   const resizeObserver = new ResizeObserver(() => {

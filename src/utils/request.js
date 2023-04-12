@@ -26,9 +26,7 @@ instance.interceptors.response.use((response) => {
   // 1003：token过期，重新登录
   if (response.code === 1002|| response.code === 1003) {
     router.push({
-      path: "/login",
-      // 将当前页面的路径作为参数，登录成功后跳转到该页面
-      query: { redirect: router.currentRoute.fullPath },
+      path: "/login"
     });
   }
   return response;

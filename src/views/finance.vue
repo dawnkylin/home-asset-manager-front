@@ -40,7 +40,8 @@
       <el-table-column type="selection" width="55" />
       <el-table-column prop="name" label="名称" show-overflow-tooltip width="130"></el-table-column>
       <el-table-column prop="amount" label="金额" sortable show-overflow-tooltip width="120"></el-table-column>
-      <el-table-column prop="date" label="记录日期" sortable show-overflow-tooltip width="150"></el-table-column>
+      <el-table-column prop="createdDate" label="记录日期" sortable show-overflow-tooltip width="150"></el-table-column>
+      <el-table-column prop="userName" label="创建者" show-overflow-tooltip width="120"></el-table-column>
       <el-table-column prop="notes" label="备注" show-overflow-tooltip min-width="200"></el-table-column>
       <el-table-column prop="assetSerialNumber" label="关联资产序列号" show-overflow-tooltip width="200"></el-table-column>
       <el-table-column label="操作" show-overflow-tooltip width="200">
@@ -534,7 +535,8 @@ const type = ref(route.meta.type);
 // 获取表格数据
 const getTableData = () => {
   axios.getRequest(
-    '/finance/getFinanceList/' + getLocalStorage("user").id + '?pageNum=' + currentPage.value +
+    '/finance/getFinanceList' +'?userId=' + getLocalStorage("user").id +
+    '&homeSerialNumber=' + getLocalStorage("user").homeSerialNumber + '&pageNum=' + currentPage.value +
     '&pageSize=' + pageSize.value + '&searchType=' + searchType.value + '&searchValue=' + search.value +
     '&type=' + type.value
   ).then((res) => {

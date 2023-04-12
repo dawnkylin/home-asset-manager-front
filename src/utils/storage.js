@@ -16,9 +16,7 @@ export const setLocalStorage = (name, content) => {
 export const getLocalStorage = (name) => {
   if (!name) return;
   try {
-    // 尝试将localStorage中的内容转换为JSON对象
-    const t = JSON.parse(localStorage.getItem(name));
-    return t;
+    return JSON.parse(localStorage.getItem(name));
   } catch (e) {
     return localStorage.getItem(name);
   }
