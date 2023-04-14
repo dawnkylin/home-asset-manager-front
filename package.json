@@ -19,6 +19,7 @@
     "element-plus": "^2.2.32",
     "lodash": "^4.17.21",
     "md5": "^2.3.0",
+    "moment": "^2.29.4",
     "pinia": "^2.0.28",
     "pinia-plugin-persistedstate": "^3.1.0",
     "postcss": "latest",

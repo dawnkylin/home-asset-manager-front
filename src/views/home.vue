@@ -14,9 +14,12 @@
     </el-row>
     <!-- 点击切换ECharts主题 -->
     <el-divider content-position="center">主题切换 -- {{ curTheme }}</el-divider>
-    <el-tooltip effect="dark" content="点击切换图表主题" placement="top" v-for="tab in themeTabList" :key="tab.index">
-      <div class="tab" v-html="tab.content" @click="themeTabClick"></div>
-    </el-tooltip>
+    <!-- 使用一个个tab不美观，使用下拉框 -->
+    <el-select v-model="curTheme" placeholder="切换图表主题" @change="themeChange">
+      <el-option v-for="item in themeList" :key="item.index" :label="item.content" :value="item.content">
+        <el-tag type="success">{{ item.content }}</el-tag>
+      </el-option>
+    </el-select>
     <el-divider content-position="center">资产分析</el-divider>
     <el-row>
       <el-col :span="12" :xs="24">
@@ -47,11 +50,12 @@ export default {
 };
 </script>
 <script setup>
-import { onMounted, ref, computed, onBeforeUnmount } from "vue";
+import { onMounted, ref, onBeforeUnmount,computed } from "vue";
 import * as echarts from "echarts";
 import { useRouter } from "vue-router";
 import { getLocalStorage } from "@utils/storage";
 import axios from "@utils/request";
+import debounce from "lodash/debounce";
 // eslint-disable-next-line no-unused-vars
 const vintageImport = () => import("@assets/echarts_theme/vintage");
 // eslint-disable-next-line no-unused-vars
@@ -100,7 +104,7 @@ const yearTabClick = (e) => {
   });
 };
 
-const themeTabList = ref([
+const themeList = ref([
   { index: 0, content: "light" },
   { index: 1, content: "dark" },
   { index: 2, content: "vintage" },
@@ -116,22 +120,11 @@ const themeTabList = ref([
   { index: 12, content: "purplePassion" },
 ]);
 
-// 主题切换
-const themeTabClick = async (e) => {
-  // 点击的是当前主题
-  if (e.target.innerHTML == curTheme.value) {
-    return;
-  }
+const themeChange = async (value) => {
   // light是默认主题，不需要导入
-  if (e.target.innerHTML !== "light") {
-    await eval(e.target.innerHTML + "Import()");
+  if (value !== "light") {
+    await eval(value + "Import()");
   }
-  // 点击的是其他主题
-  // 销毁图表实例
-  myChart1.value.dispose();
-  myChart2.value.dispose();
-  myChart3.value.dispose();
-  curTheme.value = e.target.innerHTML;
   // 重新渲染图表
   renderChart1();
   renderChart2();
@@ -141,18 +134,29 @@ const themeTabClick = async (e) => {
 const curTheme = ref('light');
 
 const chart1 = ref();
+
 const chart2 = ref();
+
 const chart3 = ref();
 
 const myChart1 = computed(() => {
+  if(myChart1.value!=null){
+    myChart1.value.dispose();
+  }
   return echarts.init(chart1.value, curTheme.value);
-});
+},[curTheme]);
 const myChart2 = computed(() => {
+  if(myChart2.value!=null){
+    myChart2.value.dispose();
+  }
   return echarts.init(chart2.value, curTheme.value);
-});
+},[curTheme]);
 const myChart3 = computed(() => {
+  if(myChart3.value!=null){
+    myChart3.value.dispose();
+  }
   return echarts.init(chart3.value, curTheme.value);
-});
+},[curTheme]);
 
 const incomeData = ref([]);
 
@@ -321,7 +325,6 @@ const renderChart2 = () => {
     legend: {
       orient: "vertical",
       left: "left",
-      data: ["房产", "车辆", "金融资产", "家居用品", "电子产品", "其他"],
     },
     // 工具栏
     toolbox: {
@@ -396,7 +399,6 @@ const renderChart3 = () => {
     legend: {
       orient: "vertical",
       left: "left",
-      data: ["生活用品", "教育", "旅游", "医疗", "其他"],
     },
     // 工具栏
     toolbox: {
@@ -440,30 +442,32 @@ const renderChart3 = () => {
   myChart3.value.setOption(option, true);
 };
 
+let resizeObserver = null;
 
 onMounted(() => {
-  // 等请求数据getIncomeData、getExpenseData完成再渲染图表
-  Promise.all([getIncomeData(), getExpenseData()]).then(() => {
+  // 等请求数据完成再渲染图表
+  Promise.all([getIncomeData(), getExpenseData(), getFixedData(), getFluidData()]).then(() => {
     renderChart1();
-  });
-  Promise.all([getFixedData(), getFluidData()]).then(() => {
     renderChart2();
     renderChart3();
-  });
+  }).then(() => {
+    //监听chart1、chart2、chart3尺寸变化，重绘图表
+    resizeObserver = new ResizeObserver(() => {
+      //使用lodash的防抖函数，避免频繁使用echarts实例的resize方法
+      debounce(() => {
+        myChart1.value.resize();
+        myChart2.value.resize();
+        myChart3.value.resize();
+      }, 500)();
+    });
+    resizeObserver.observe(chart1.value);
+    resizeObserver.observe(chart2.value);
+    resizeObserver.observe(chart3.value);
 
-
-  // 监听容器尺寸变化，重绘图表
-  const resizeObserver = new ResizeObserver(() => {
-    myChart1.value.resize();
-    myChart2.value.resize();
-    myChart3.value.resize();
   });
-  resizeObserver.observe(chart1.value);
-  resizeObserver.observe(chart2.value);
-  resizeObserver.observe(chart3.value);
-  onBeforeUnmount(() => {
-    resizeObserver.disconnect();
-  });
+});
+onBeforeUnmount(() => {
+  resizeObserver.disconnect();
 });
 </script>
 <style scoped lang="scss">

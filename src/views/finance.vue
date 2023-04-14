@@ -4,7 +4,7 @@
     <el-col :span="4" :xs="24">
       <el-select v-model="searchType" placeholder="请选择搜索类型" size="large" clearable>
         <el-option label="名称" value="name"></el-option>
-        <el-option label="记录日期" value="date"></el-option>
+        <el-option label="记录日期" value="createdDate"></el-option>
         <el-option label="备注" value="notes"></el-option>
         <el-option label="关联资产序列号" value="assetSerialNumber"></el-option>
         <el-option label="金额" value="amount"></el-option>
@@ -28,15 +28,19 @@
       </el-popconfirm>
     </el-col>
     <!-- 导出、导入按钮 -->
-    <el-col :span="3" :xs="24">
+    <el-col :span="3.5" :xs="24">
       <el-button type="primary" @click="handleExport" size="large">导出</el-button>
       <el-button type="primary" @click="handleImport" size="large">导入</el-button>
+    </el-col>
+    <!-- 选择展示方式 -->
+    <el-col :span="3.5" :xs="24">
+      <el-switch v-model="isCard" active-text="卡片" inactive-text="表格" active-color="#13ce66" inactive-color="#ff4949" />
     </el-col>
   </el-row>
   <el-row>
     <!-- 财务表格 -->
-    <el-table :data="tableData" v-loading="loading" stripe border @selection-change="handleSelectionChange"
-      :header-cell-style="{ background: '#1C1C1C', color: 'white' }">
+    <el-table v-show="!isCard" :data="tableData" v-loading="loading" stripe border
+      @selection-change="handleSelectionChange" :header-cell-style="{ background: '#1C1C1C', color: 'white' }">
       <el-table-column type="selection" width="55" />
       <el-table-column prop="name" label="名称" show-overflow-tooltip width="130"></el-table-column>
       <el-table-column prop="amount" label="金额" sortable show-overflow-tooltip width="120"></el-table-column>
@@ -55,6 +59,50 @@
         </template>
       </el-table-column>
     </el-table>
+  </el-row>
+  <!-- 以卡片形式显示数据 -->
+  <el-row>
+    <el-space v-show="isCard" wrap>
+      <el-card class="box-card" v-for="item in tableData" :key="item.id"
+        :body-style="{ padding: '20px'}">
+        <template #header>
+          <div class="card-header">
+            <span>{{ item.name }}</span>
+            <div>
+              <el-button :icon="Edit" round @click="handleEdit(item)">
+              </el-button>
+              <el-popconfirm title="确定删除该记录吗？" @confirm="handleDelete(item)">
+                <template #reference>
+                  <el-button :icon="Delete" type="danger" round></el-button>
+                </template>
+              </el-popconfirm>
+            </div>
+          </div>
+        </template>
+        <div class="card-body">
+          <div>
+              <el-tag type="success">金额</el-tag>
+              <span>{{ item.amount }}</span>
+            </div>
+            <div>
+              <el-tag type="success">记录日期</el-tag>
+              <span>{{ item.createdDate }}</span>
+            </div>
+            <div>
+              <el-tag type="success">创建者</el-tag>
+              <span>{{ item.userName }}</span>
+            </div>
+            <div>
+              <el-tag type="success">备注</el-tag>
+              <span class="card-text-break">{{ item.notes }}</span>
+            </div>
+            <div>
+              <el-tag type="success">关联资产序列号</el-tag>
+              <span class="card-text-break">{{ item.assetSerialNumber }}</span>
+            </div>
+        </div>
+      </el-card>
+    </el-space>
   </el-row>
   <!-- 分页 -->
   <el-row>
@@ -81,8 +129,8 @@
         <el-input v-model="addForm.amount" placeholder="请输入金额"></el-input>
       </el-form-item>
       <!-- 记录日期 -->
-      <el-form-item label="记录日期" prop="date">
-        <el-date-picker v-model="addForm.date" type="date" placeholder="选择日期" value-format="YYYY-MM-DD">
+      <el-form-item label="记录日期" prop="createdDate">
+        <el-date-picker v-model="addForm.createdDate" type="createdDate" placeholder="选择日期" value-format="YYYY-MM-DD">
         </el-date-picker>
       </el-form-item>
       <!-- 财务备注 -->
@@ -118,8 +166,8 @@
         <el-input v-model="editForm.amount" placeholder="请输入金额"></el-input>
       </el-form-item>
       <!-- 记录日期 -->
-      <el-form-item label="记录日期" prop="date">
-        <el-date-picker v-model="editForm.date" type="date" placeholder="选择日期" value-format="YYYY-MM-DD">
+      <el-form-item label="记录日期" prop="createdDate">
+        <el-date-picker v-model="editForm.createdDate" type="createdDate" placeholder="选择日期" value-format="YYYY-MM-DD">
         </el-date-picker>
       </el-form-item>
       <!-- 财务备注 -->
@@ -143,17 +191,20 @@
 </template>
 <script>
 export default {
-  name: 'FinancePage',
+  name: "FinancePage",
 };
 </script>
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { Search } from '@element-plus/icons-vue';
+import { Search, Edit, Delete } from '@element-plus/icons-vue';
 import axios from "@utils/request";
-import { getLocalStorage } from '@utils/storage';
+import { getLocalStorage,setLocalStorage } from '@utils/storage';
 import { ElNotification } from 'element-plus';
 import * as XLSX from 'xlsx';
 import { useRoute, } from 'vue-router';
+import moment from 'moment';
+
+const isCard = ref(true);
 
 // 搜索栏
 const searchType = ref('');
@@ -179,9 +230,9 @@ const addForm = ref({
   name: '',
   notes: '',
   userId: getLocalStorage('user').id,
-  type: route.meta.type==='income'?1:0,
+  type: route.meta.type === 'income' ? 1 : 0,
   amount: '',
-  date: '',
+  createdDate: '',
   assetSerialNumber: '',
 });
 
@@ -211,7 +262,7 @@ const addFormRules = ref({
     },
     { pattern: /^([1-9]\d{0,9}|0)(\.\d{1,2})?$/, message: '请输入正确数字值', trigger: 'blur' }
   ],
-  date: [
+  createdDate: [
     {
       required: true,
       message: '请选择记录日期',
@@ -257,7 +308,7 @@ const handleAdd = () => {
     userId: getLocalStorage('user').id,
     type: '',
     amount: '',
-    date: '',
+    createdDate: '',
     assetSerialNumber: '',
   };
 };
@@ -276,7 +327,7 @@ const editForm = ref({
   userId: getLocalStorage('user').id,
   type: '',
   assetSerialNumber: '',
-  date: '',
+  createdDate: '',
   amount: '',
   notes: ''
 });
@@ -289,9 +340,9 @@ const handleEdit = (row) => {
     id: row.id,
     name: row.name,
     userId: row.userId,
-    type: row.type===1?"1":"0",
+    type: row.type === 1 ? "1" : "0",
     assetSerialNumber: row.assetSerialNumber,
-    date: row.date,
+    createdDate: row.createdDate,
     amount: row.amount,
     notes: row.notes
   }
@@ -323,7 +374,7 @@ const editFormRules = ref({
     },
     { pattern: /^([1-9]\d{0,9}|0)(\.\d{1,2})?$/, message: '请输入正确数字值', trigger: 'blur' }
   ],
-  date: [
+  createdDate: [
     {
       required: true,
       message: '请选择记录日期',
@@ -438,7 +489,7 @@ const handleExport = () => {
       name: item.name,
       type: item.type,
       amount: item.amount,
-      date: item.date,
+      createdDate: item.createdDate,
       assetSerialNumber: item.assetSerialNumber,
       notes: item.notes,
     };
@@ -535,11 +586,15 @@ const type = ref(route.meta.type);
 // 获取表格数据
 const getTableData = () => {
   axios.getRequest(
-    '/finance/getFinanceList' +'?userId=' + getLocalStorage("user").id +
+    '/finance/getFinanceList' + '?userId=' + getLocalStorage("user").id +
     '&homeSerialNumber=' + getLocalStorage("user").homeSerialNumber + '&pageNum=' + currentPage.value +
     '&pageSize=' + pageSize.value + '&searchType=' + searchType.value + '&searchValue=' + search.value +
     '&type=' + type.value
   ).then((res) => {
+    //日期格式处理
+    res.data.list.forEach((item) => {
+      item.createdDate = moment(item.createdDate).format('YYYY-MM-DD');
+    });
     tableData.value = res.data.list;
     // 延时0.5s
     setTimeout(() => {
@@ -550,8 +605,15 @@ const getTableData = () => {
 };
 
 onMounted(() => {
-  // 获取表格数据
-  getTableData();
+  //重新获取用户信息
+  axios.getRequest('/account/getAccountDetail/' + getLocalStorage('user').id).then(res => {
+    if (res.code === 200) {
+      setLocalStorage('user', res.data);
+    }
+  }).then(() => {
+    // 获取表格数据
+    getTableData();
+  });
 });
 
 // const router = useRouter();
@@ -575,5 +637,32 @@ watch(
 .el-row {
   margin-right: 0 !important;
   padding: 1rem;
+}
+
+.box-card {
+  padding: .5rem;
+  border-radius: 10px;
+  width: fit-content;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .card-text-break {
+    white-space: normal;
+    word-break: break-all;
+    height: fit-content;
+    max-width: 200px;
+    display: inline-block;
+  }
+  .card-body{
+    &>div{
+      margin-bottom: .5rem;
+      >span{
+        margin-left: .5rem;
+      }
+    }
+  }
 }
 </style>

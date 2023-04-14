@@ -94,3 +94,29 @@ pm2 delete 家庭资产管家前端项目
 3、修改密码时先验证旧密码是否正确，再看新旧密码是否相同
 
 4、个人信息的手机号、家庭序列号、注册时间皆不可修改
+
+5、注册密码使用强密码验证
+
+6、发布使用https协议，测试时使用http协议
+
+7、数据备份使用阿里云OSS
+
+8、漏洞扫描使用阿里云安全中心
+
+9、使用阿里云CDN加速
+
+10、使用阿里云云盾DDoS防护
+
+11、可以使用卡片或者表格展示数据
+
+12、可以使用图表展示数据
+
+13、可以导入、导出数据
+
+14、gson日期格式问题，它返回MM d, yyyy或者MMM d, yyyy，前端需要转换成yyyy-MM-dd，使用moment.js处理后，转换成yyyy-MM-dd，将其返回，后端再转换成Date类型，gson报错，故对gson使用自定义日期格式，使用yyyy-MM-dd HH:mm:ss
+
+15、使用lodash的防抖函数，解决echarts图表的resize问题导致的页面不流畅
+
+16、dialog中的form表单按回车键，提交表单，使用prevent修饰符阻止该行为
+
+17、el-table的min-width小于等于其他列的width时，出现resize的bug，解决办法：将min-width设置为大于其他width的值

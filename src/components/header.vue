@@ -69,8 +69,6 @@ const handleCommand = (command) => {
         .then((res) => {
           console.log(res.message);
           authStore.logout();
-        })
-        .finally(() => {
           router.push({ name: "login" });
         });
       break;

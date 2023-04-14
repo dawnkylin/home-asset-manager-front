@@ -27,7 +27,7 @@ module.exports = merge(baseWebpackConfig, cssWebpackConfig, {
     hot: true,
     allowedHosts: [
       // cpolar内网穿透地址 http://127.0.0.1:9200/
-      "77b051ab.r5.vip.cpolar.cn",
+      "66e75844.r10.cpolar.top",
     ],
     // 代理解决跨域问题
     proxy: {

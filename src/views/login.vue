@@ -19,8 +19,8 @@
         <el-link @click.prevent="router.push({ name: 'register' })">去注册</el-link>
       </el-form-item>
     </el-form>
+    <GithubCornerMark />
   </div>
-  <GithubCornerMark />
 </template>
 <script>
 export default {

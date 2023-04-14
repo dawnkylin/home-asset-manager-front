@@ -36,8 +36,8 @@
         <el-link @click="router.push({ name: 'login' })">去登录</el-link>
       </el-form-item>
     </el-form>
+    <GithubCornerMark />
   </div>
-  <GithubCornerMark />
 </template>
 <script>
 export default {
@@ -49,7 +49,7 @@ import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import button1 from "@components/button1.vue";
 import GithubCornerMark from "@components/github-corner-mark.vue";
-import { isPassword } from "@utils/regex";
+import { isStrongPassword } from "@utils/regex";
 import { Phone, Lock } from "@element-plus/icons-vue";
 import axios from "@utils/request";
 import { ElMessage } from "element-plus";
@@ -80,7 +80,7 @@ const rules = reactive({
     { required: true, message: "请输入密码", trigger: "blur" },
     {
       validator: (rule, value, callback) => {
-        if (!isPassword(value)) {
+        if (!isStrongPassword(value)) {
           callback(new Error("密码长度不能小于6位，且必须包含数字和字母"));
         } else {
           callback();
@@ -111,7 +111,7 @@ const sendSms = () => {
         .then((res) => {
           // 发送成功
           if (res.code === 200) {
-            ElMessage.success("验证码发送成功");
+            ElMessage.success(res.message);
             // 60s倒计时
             let count = 60;
             const timer = setInterval(() => {
@@ -128,10 +128,16 @@ const sendSms = () => {
           // 手机号不存在
           else if (res.code === 1007) {
             ElMessage.error("手机号不存在");
+            isDisabled.value = false;
+          }
+          else {
+            ElMessage.error("验证码发送失败");
+            isDisabled.value = false;
           }
         })
         .catch((err) => {
           ElMessage.error("验证码发送失败：" + err);
+          isDisabled.value = false;
         });
     } else {
       ElMessage.error("请检查表单数据");

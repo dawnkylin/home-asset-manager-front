@@ -1,8 +1,8 @@
 <template>
   <el-row :gutter="20">
     <!-- 搜索栏 -->
-    <el-col :span="4" :xs="24">
-      <el-select v-model="searchType" placeholder="请选择搜索类型" size="large" clearable>
+    <el-col :span="4.5" :xs="24">
+      <el-select v-model="searchType" placeholder="请选择搜索类型" clearable>
         <el-option label="名称" value="name"></el-option>
         <el-option label="类型" value="assetType"></el-option>
         <el-option label="价格" value="purchasePrice"></el-option>
@@ -11,8 +11,8 @@
         <el-option label="备注" value="notes"></el-option>
       </el-select>
     </el-col>
-    <el-col :span="5" :xs="24">
-      <el-input v-model="search" placeholder="请输入搜索内容" clearable @clear="handleSearch" size="large">
+    <el-col :span="5.5" :xs="24">
+      <el-input v-model="search" placeholder="请输入搜索内容" clearable @clear="handleSearch">
         <template #append>
           <el-button :icon="Search" @click="handleSearch">
           </el-button>
@@ -21,23 +21,27 @@
     </el-col>
     <!-- 添加、批量删除按钮 -->
     <el-col :span="3.5" :xs="24">
-      <el-button type="primary" @click="handleAdd" size="large">添加</el-button>
+      <el-button type="primary" @click="handleAdd">添加</el-button>
       <el-popconfirm title="确定删除选中的资产吗?" @confirm="handleBatchDelete">
         <template #reference>
-          <el-button type="primary" size="large">批量删除</el-button>
+          <el-button type="primary">批量删除</el-button>
         </template>
       </el-popconfirm>
     </el-col>
     <!-- 导出、导入按钮 -->
-    <el-col :span="3" :xs="24">
-      <el-button type="primary" @click="handleExport" size="large">导出</el-button>
-      <el-button type="primary" @click="handleImport" size="large">导入</el-button>
+    <el-col :span="3.5" :xs="24">
+      <el-button type="primary" @click="handleExport">导出</el-button>
+      <el-button type="primary" @click="handleImport">导入</el-button>
+    </el-col>
+    <!-- 选择展示方式：表格或者卡片 -->
+    <el-col :span="3.5" :xs="24">
+      <el-switch v-model="isCard" active-text="卡片" inactive-text="表格" active-color="#13ce66" inactive-color="#ff4949" />
     </el-col>
   </el-row>
   <el-row>
     <!-- 资产表格 -->
-    <el-table :data="tableData" v-loading="loading" stripe border @selection-change="handleSelectionChange"
-      :header-cell-style="{ background: '#1C1C1C', color: 'white' }">
+    <el-table v-show="!isCard" :data="tableData" v-loading="loading" stripe border
+      @selection-change="handleSelectionChange" :header-cell-style="{ background: '#1C1C1C', color: 'white' }">
       <el-table-column type="selection" width="55" />
       <el-table-column prop="name" label="名称" show-overflow-tooltip width="130"></el-table-column>
       <el-table-column prop="assetTypeName" label="类型" show-overflow-tooltip width="100">
@@ -79,11 +83,84 @@
       </el-table-column>
     </el-table>
   </el-row>
+  <!-- 以卡片形式展示资产数据 -->
+  <el-row>
+    <el-space wrap v-show="isCard">
+      <el-card class="box-card" v-for="item in tableData" :key="item.id" :body-style="{ padding: '20px' }">
+        <div>
+          <span>{{ item.name }}</span>
+        </div>
+        <el-row>
+          <el-col :span="12">
+            <el-tag type="success">资产类型</el-tag>
+          </el-col>
+          <el-col :span="12">
+            <el-tag type="success">{{ item.assetTypeName }}</el-tag>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-tag type="success">购买价格</el-tag>
+          </el-col>
+          <el-col :span="12">
+            <el-tag type="success">{{ item.purchasePrice }}</el-tag>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-tag type="success">购买日期</el-tag>
+          </el-col>
+          <el-col :span="12">
+            <el-tag type="success">{{ item.purchaseDate }}</el-tag>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-tag type="success">当前价值</el-tag>
+          </el-col>
+          <el-col :span="12">
+            <el-tag type="success">{{ item.currentValue }}</el-tag>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-tag type="success">创建者</el-tag>
+          </el-col>
+          <el-col :span="12">
+            <el-tag type="success">{{ item.userName }}</el-tag>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-tag type="success">备注</el-tag>
+          </el-col>
+          <el-col :span="12">
+            <!-- 备注长度超出自动换行 -->
+            <el-tag type="success" class="card-notes">{{ item.notes
+            }}</el-tag>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-button type="primary" round @click="handleEdit(item)">编辑</el-button>
+          </el-col>
+          <el-col :span="12">
+            <el-popconfirm title="确定删除该资产吗？" @confirm="handleDelete(item)">
+              <template #reference>
+                <el-button type="danger" round>删除</el-button>
+              </template>
+            </el-popconfirm>
+          </el-col>
+        </el-row>
+      </el-card>
+    </el-space>
+  </el-row>
   <!-- 分页 -->
   <el-row>
-    <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 30, 40]"
-      :total="total" :background="true" layout="total,sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
-      @current-change="handleCurrentChange" />
+    <el-pagination :current-page="currentPage" :page-size="pageSize" :page-sizes="[10, 20, 30, 40]" :total="total"
+      background :layout="'sizes, prev, pager, next, jumper, ->, total, slot'"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"/>
   </el-row>
 
   <!-- 添加 Dialog -->
@@ -106,6 +183,7 @@
       </el-form-item>
       <!-- 购买日期 -->
       <el-form-item label="购买日期" prop="purchaseDate">
+        //将三月 2, 2017格式的日期转换为2017-03-02格式
         <el-date-picker v-model="addForm.purchaseDate" type="date" placeholder="选择日期" value-format="YYYY-MM-DD">
         </el-date-picker>
       </el-form-item>
@@ -174,10 +252,13 @@ export default {
 import { ref, onMounted, watch } from 'vue';
 import { Search, DocumentCopy } from '@element-plus/icons-vue';
 import axios from "@utils/request";
-import { getLocalStorage } from '@utils/storage';
+import { getLocalStorage,setLocalStorage } from '@utils/storage';
 import { ElNotification } from 'element-plus';
 import * as XLSX from 'xlsx';
 import { useRoute, } from 'vue-router';
+import moment from 'moment';
+
+const isCard = ref(true);
 
 // 复制序列号到剪切板
 const copySerialNumber = (row) => {
@@ -353,7 +434,7 @@ const handleEdit = (row) => {
     purchaseDate: row.purchaseDate,
     currentValue: row.currentValue,
     notes: row.notes,
-  }
+  };
 };
 
 const editFormRef = ref();
@@ -576,8 +657,11 @@ const getTableData = () => {
     '&searchValue=' + search.value +
     '&type=' + type.value
   ).then((res) => {
+    // 处理日期格式
+    res.data.list.forEach((item) => {
+      item.purchaseDate = moment(item.purchaseDate).format('YYYY-MM-DD');
+    });
     tableData.value = res.data.list;
-    // 延时1s
     setTimeout(() => {
       loading.value = false;
     }, 500);
@@ -593,8 +677,15 @@ const getTableData = () => {
 };
 
 onMounted(() => {
-  // 获取表格数据
-  getTableData();
+  //重新获取用户信息
+  axios.getRequest('/account/getAccountDetail/' + getLocalStorage('user').id).then(res => {
+    if (res.code === 200) {
+      setLocalStorage('user', res.data);
+    }
+  }).then(() => {
+    // 获取表格数据
+    getTableData();
+  });
 });
 
 // const router = useRouter();
@@ -618,5 +709,17 @@ watch(
 .el-row {
   margin-right: 0 !important;
   padding: 1rem;
+}
+
+.box-card {
+  padding: .5rem;
+  border-radius: 10px;
+  width: fit-content;
+
+  .card-notes {
+    white-space: normal;
+    word-break: break-all;
+    height: fit-content;
+  }
 }
 </style>

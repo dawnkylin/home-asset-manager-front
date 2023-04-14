@@ -56,6 +56,8 @@
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="updateUserInfo">{{ btnName }}</el-button>
+                <!-- 重置 -->
+                <el-button type="info" @click="resetUserInfo">重置</el-button>
               </el-form-item>
             </el-form>
           </el-tab-pane>
@@ -81,7 +83,7 @@
               <div class="subtitle">家庭成员</div>
             </el-divider>
             <el-table :data="homeMembersTable" style="width: 100%" v-loading>
-              <el-table-column prop="username" label="姓名" min-width="180"></el-table-column>
+              <el-table-column prop="username" label="姓名" width="180"></el-table-column>
               <el-table-column prop="phone" label="手机号" min-width="180"></el-table-column>
               <el-table-column width="180">
                 <template #default="{ row }">
@@ -110,12 +112,15 @@
               </div>
             </el-divider>
             <el-table :data="verifyNoticeData" style="width: 100%">
-              <el-table-column prop="recipientName" label="审核人姓名" min-width="180"></el-table-column>
-              <el-table-column prop="homeSerialNumber" label="申请家庭序列号" min-width="180"></el-table-column>
-              <el-table-column prop="status" label="结果" width="180">
-                <template #default="scope">
-                  <el-tag type="success" v-if="scope.row.status === 1">已通过</el-tag>
-                  <el-tag type="danger" v-else>已拒绝</el-tag>
+              <el-table-column prop="recipientName" label="审核人姓名" width="120"></el-table-column>
+              <el-table-column prop="createdDate" label="申请时间" width="150"></el-table-column>
+              <el-table-column prop="homeSerialNumber" label="申请家庭序列号" min-width="160"></el-table-column>
+              <el-table-column prop="status" width="130">
+                <template #default="{row}">
+                  <el-tag type="success" v-if="row.status === '1'">已通过</el-tag>
+                  <el-tag type="danger" v-else-if="row.status==='2'">已拒绝</el-tag>
+                  <el-tag type="warning" v-else-if="row.status==='0'">待审核</el-tag>
+                  <el-tag type="info" v-else>你已被移除</el-tag>
                 </template>
               </el-table-column>
             </el-table>
@@ -125,12 +130,20 @@
               </div>
             </el-divider>
             <el-table :data="joinNoticeData" style="width: 100%">
-              <el-table-column prop="name" label="姓名" min-width="180"></el-table-column>
-              <el-table-column prop="phone" label="手机号" min-width="180"></el-table-column>
-              <el-table-column prop="status" label="操作" width="180">
+              <el-table-column prop="applicationName" label="姓名" width="150"></el-table-column>
+              <el-table-column prop="applicationPhone" label="手机号" width="180"></el-table-column>
+              <el-table-column prop="status" width="150">
                 <template #default="{ row }">
-                  <el-button type="text" size="small" @click="handleEdit(row)">同意</el-button>
-                  <el-button type="text" size="small" @click="handleDelete(row)">拒绝</el-button>
+                  <el-popconfirm title="确定要通过该申请吗？" @confirm="agree(row)">
+                    <template #reference>
+                      <el-button type="text" size="small">通过</el-button>
+                    </template>
+                  </el-popconfirm>
+                  <el-popconfirm title="确定要拒绝该申请吗？" @confirm="refuse(row)">
+                    <template #reference>
+                      <el-button type="text" size="small">拒绝</el-button>
+                    </template>
+                  </el-popconfirm>
                 </template>
               </el-table-column>
             </el-table>
@@ -147,7 +160,7 @@
         <el-input v-model="newHomeForm.homeName"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="createHome">提交</el-button>
+        <el-button type="primary" @click.prevent="createHome">提交</el-button>
       </el-form-item>
     </el-form>
   </el-dialog>
@@ -159,7 +172,7 @@
         <el-input v-model="joinHomeForm.homeSerialNumber"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="joinHome">提交</el-button>
+        <el-button type="primary" @click.prevent="joinHome">提交</el-button>
       </el-form-item>
     </el-form>
   </el-dialog>
@@ -184,7 +197,13 @@ const userInfo = ref({
 });
 
 onMounted(() => {
-  userInfo.value = getLocalStorage('user');
+  //重新获取用户信息
+  axios.getRequest('/account/getAccountDetail/'+getLocalStorage('user').id).then(res => {
+    if (res.code === 200) {
+      setLocalStorage('user', res.data);
+      userInfo.value = res.data;
+    }
+  });
 });
 
 const pwdForm = ref({
@@ -244,56 +263,27 @@ const isDisabled = ref(true);
 
 const btnName = ref("编辑");
 
-const homeMembersTable = ref([
-  {
-    name: "张三",
-    phone: "12345678901"
-  },
-  {
-    name: "李四",
-    phone: "12345678901"
-  },
-  {
-    name: "王五",
-    phone: "12345678901"
-  }
-]);
+const homeMembersTable = ref([]);
 
-const verifyNoticeData = ref([
-  {
-    recipientName: "张三",
-    homeSerialNumber: "12345678901",
-    status: 1
-  },
-  {
-    recipientName: "李四",
-    homeSerialNumber: "12345678901",
-    status: 0
-  },
-  {
-    recipientName: "王五",
-    homeSerialNumber: "12345678901",
-    status: 1
-  }
-]);
+const verifyNoticeData = ref([]);
 
-const joinNoticeData = ref([
-  {
-    name: "张三",
-    phone: "12345678901",
-    status: 1
-  },
-  {
-    name: "李四",
-    phone: "12345678901",
-    status: 0
-  },
-  {
-    name: "王五",
-    phone: "12345678901",
-    status: 1
+const getVerifyNoticeData = async () => {
+  const res = await axios.getRequest('/homeRequest/getRequestList/' +
+  getLocalStorage('user').id);
+  if (res.code === 200) {
+    verifyNoticeData.value = res.data;
   }
-]);
+};
+
+const joinNoticeData = ref([]);
+
+const getJoinNoticeData = async () => {
+  const res = await axios.getRequest('/homeRequest/getUnhandledRequestList/' +
+  getLocalStorage('user').id);
+  if (res.code === 200) {
+    joinNoticeData.value = res.data;
+  }
+};
 
 const userInfoRef = ref(null);
 
@@ -329,12 +319,18 @@ const updateUserInfo = () => {
   }
 };
 
+const resetUserInfo = () => {
+  btnName.value = "编辑";
+  isDisabled.value = true;
+  userInfo.value = getLocalStorage('user');
+};
+
 const isCreator = ref(false);
 
 const tabChange = (tabName) => {
   if (tabName === "third") {
     if (getLocalStorage('user').homeSerialNumber === null) {
-      ElMessage.error("您还没有加入家庭");
+      // ElMessage.error("您还没有加入家庭");
       return;
     }
     axios.getRequest("/home/isHomeCreator?homeSerialNumber=" + getLocalStorage('user').homeSerialNumber +
@@ -342,6 +338,14 @@ const tabChange = (tabName) => {
         isCreator.value = res.data;
       });
     getHomeMembers();
+  }
+  else if (tabName === "fourth") {
+    getJoinNoticeData();
+    if (getLocalStorage('user').homeSerialNumber != null) {
+      return;
+    }
+    //没有家庭才能发起加入请求
+    getVerifyNoticeData();
   }
 };
 
@@ -376,24 +380,29 @@ const newHomeForm = ref({
 });
 
 const createHome = () => {
-  if(userInfo.value.homeSerialNumber !== null) {
+  if (userInfo.value.homeSerialNumber !== null) {
     ElMessage.error("您已经加入家庭！");
     return;
   }
-  axios.postRequest("/home/createHome", newHomeForm.value).then(res => {
-    if (res.code === 200) {
-      ElMessage.success("创建成功");
-      createHomeDialogVisible.value = false;
-      newHomeForm.value = {
-        homeName: ""
-      };
-      userInfo.value.homeSerialNumber = res.data;
-      setLocalStorage('user', userInfo.value);
-    }
-    else {
-      ElMessage.error(res.message);
-    }
-  });
+  axios.postRequest("/home/createHome/" +
+    getLocalStorage('user').id + '?homeName=' + newHomeForm.value.homeName)
+    .then(res => {
+      if (res.code === 200) {
+        ElMessage.success("创建成功");
+        createHomeDialogVisible.value = false;
+        newHomeForm.value = {
+          homeName: ""
+        };
+        userInfo.value.username = newHomeForm.value.homeName;
+        userInfo.value.homeSerialNumber = res.data;
+        setLocalStorage('user', userInfo.value);
+      }
+      else {
+        ElMessage.error(res.message);
+      }
+    }).catch(err => {
+      ElMessage.error(err.message);
+    });
 };
 
 const joinHomeDialogVisible = ref(false);
@@ -403,9 +412,56 @@ const joinHomeForm = ref({
 });
 
 const joinHome = () => {
-  console.log(joinHomeForm.value);
+  if (userInfo.value.homeSerialNumber !== null) {
+    ElMessage.error("您已经加入家庭！");
+    return;
+  }
+  axios.postRequest("/homeRequest/joinHome/" +
+    getLocalStorage('user').id + '?homeSerialNumber=' + joinHomeForm.value.homeSerialNumber)
+    .then(res => {
+      if (res.code === 200) {
+        ElMessage.success("请求发送成功！");
+        joinHomeDialogVisible.value = false;
+        joinHomeForm.value = {
+          homeSerialNumber: ""
+        };
+      }
+      else if (res.code === 1010) {
+        ElMessage.error("该家庭不存在！");
+      }
+      else if (res.code === 1011) {
+        ElMessage.error("您已经加入家庭或者已经发送过加入请求！");
+      }
+    }).catch((err) => {
+      ElMessage.error(err.message);
+    });
 };
 
+const agree = (row) => {
+  axios.postRequest("/homeRequest/agreeJoinHome?requestId=" + row.recipientId +
+    "&joinId=" + row.applicationId).then(res => {
+      if (res.code === 200) {
+        ElMessage.success("操作成功");
+        getJoinNoticeData();
+      }
+      else {
+        ElMessage.error(res.message);
+      }
+    });
+};
+
+const refuse = (row) => {
+  axios.postRequest("/homeRequest/refuseJoinHome?requestId=" + row.requestId +
+    "&homeSerialNumber=" + row.homeSerialNumber).then(res => {
+      if (res.code === 200) {
+        ElMessage.success("已拒绝");
+        getJoinNoticeData();
+      }
+      else {
+        ElMessage.error(res.message);
+      }
+    });
+};
 </script>
 <style lang="scss" scoped>
 .container {
