@@ -120,3 +120,34 @@ pm2 delete 家庭资产管家前端项目
 16、dialog中的form表单按回车键，提交表单，使用prevent修饰符阻止该行为
 
 17、el-table的min-width小于等于其他列的width时，出现resize的bug，解决办法：将min-width设置为大于其他width的值
+
+# Alibaba Cloud Linux的相关安装
+
+确切版本：Alibaba Cloud Linux  3.2104 LTS 64位
+
+安装redis
+
+```shell
+sudo yum install gcc make wget
+# 下载redis
+wget http://download.redis.io/releases/redis-6.2.6.tar.gz
+# 解压redis包
+tar xzf redis-6.2.6.tar.gz
+# 进入redis目录，编译redis
+cd redis-6.2.6
+make
+# 安装redis
+sudo make install
+# 启动redis作为后台服务
+redis-server &
+# 查看redis进程
+ps -ef | grep redis
+# 查看redis是否启动
+redis-cli ping
+# 如果返回PONG，说明redis启动成功
+# 关闭redis保护模式
+redis-cli config set protected-mode no
+# 关闭redis
+redis-cli shutdown
+```
+
