@@ -49,6 +49,11 @@ const pageStore = usePageStore();
 // 点击汉堡包图标，展开或收起侧边栏
 const toggleAside = () => {
   pageStore.isCollapse = !pageStore.isCollapse;
+  pageStore.showAside = !pageStore.showAside;
+  //设备宽度小于等于540px时，使用遮罩层
+  if (window.innerWidth <= 540) {
+    pageStore.showMask = !pageStore.showMask;
+  }
 };
 // 点击头像，展开或收起下拉菜单，点击下拉菜单的选项，跳转到相应页面
 const handleCommand = (command) => {
@@ -69,6 +74,7 @@ const handleCommand = (command) => {
         .then((res) => {
           console.log(res.message);
           authStore.logout();
+          // 跳转到登录页面
           router.push({ name: "login" });
         });
       break;

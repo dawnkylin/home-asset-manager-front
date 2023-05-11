@@ -4,6 +4,8 @@ import { useRoute } from "vue-router";
 export const usePageStore = defineStore("page", {
   state: () => ({
     isCollapse: false,
+    showAside: true,
+    showAsideMask: false,
     route: useRoute(),
     countdown: 0,
   }),

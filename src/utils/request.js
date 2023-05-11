@@ -1,7 +1,4 @@
 import axios from "axios";
-import { useRouter } from "vue-router";
-
-const router = useRouter();
 
 // 创建axios实例
 const instance = axios.create({
@@ -25,9 +22,7 @@ instance.interceptors.response.use((response) => {
   // 1002：未登录，没有token或token没有Bearer前缀
   // 1003：token过期，重新登录
   if (response.code === 1002|| response.code === 1003) {
-    router.push({
-      path: "/login"
-    });
+    this.$router.push({ name: "login" });
   }
   return response;
 });

@@ -1,6 +1,8 @@
 import routes from "./routes";
 import { createRouter, createWebHashHistory } from "vue-router";
 import axios from "@utils/request";
+import { getLocalStorage, setLocalStorage } from "@utils/storage";
+import { useAuthStore } from "@stores/auth";
 
 /**
  * this.$route.params.
@@ -17,12 +19,29 @@ const router = createRouter({
 
 // “guestOnly”表示只有未登录用户才能访问，“requiresAuth”表示只有已登录用户才能访问。
 router.beforeEach((to, from, next) => {
+  //没有匹配到路由跳转到404页面
+  if (to.matched.length === 0) {
+    next({ name: "notFound" });
+    return;
+  }
+  //无权访问跳转到403页面
+  if (to.meta.role === "admin" && getLocalStorage("user").role === "user") {
+    next({ name: "forbidden" });
+    return;
+  }
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     // 没登录就跳去登录页面
     axios.getRequest("/auth/isLogin").then((res) => {
       if (!res.success) {
         next({ name: "login" });
       } else {
+        //每次跳转重新获取用户信息
+        axios.getRequest("/account/getAccountDetail/" + getLocalStorage("user").id).then((res) => {
+          if (res.code === 200) {
+            useAuthStore().user = res.data;
+            setLocalStorage("user", res.data);
+          }
+        });
         next();
       }
     });
@@ -30,6 +49,13 @@ router.beforeEach((to, from, next) => {
     // 已登录就跳去主页
     axios.getRequest("/auth/isLogin").then((res) => {
       if (res.success) {
+        //每次跳转重新获取用户信息
+        axios.getRequest("/account/getAccountDetail/" + getLocalStorage("user").id).then((res) => {
+          if (res.code === 200) {
+            useAuthStore().user = res.data;
+            setLocalStorage("user", res.data);
+          }
+        });
         next({ name: "home" });
       } else {
         next();

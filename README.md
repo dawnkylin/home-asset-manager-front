@@ -150,4 +150,6 @@ redis-cli config set protected-mode no
 # 关闭redis
 redis-cli shutdown
 ```
+# 权限管理
 
+使用pinia存储用户角色信息，使用vue-router的beforeEach钩子函数，判断用户角色

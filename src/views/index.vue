@@ -31,7 +31,8 @@
       </template>
     </el-drawer>
     <!-- 侧边栏 -->
-    <aside>
+    <div class="mask" @click="pageStore.showAside = false" v-show="pageStore.showAsideMask"></div>
+    <aside v-show="pageStore.showAside">
       <my-aside></my-aside>
     </aside>
     <!-- 主体 -->
@@ -42,11 +43,13 @@
       </header>
       <!-- 内容 -->
       <section>
-        <router-view v-slot="{Component}">
+        <router-view v-slot="{ Component }">
           <transition name="fade" mode="out-in">
-            <div>
-              <component :is="Component" />
-            </div>
+            <keep-alive>
+              <div>
+                <component :is="Component" />
+              </div>
+            </keep-alive>
           </transition>
         </router-view>
       </section>
@@ -63,8 +66,11 @@ export default {
 <script setup>
 import myHeader from "@components/header";
 import myAside from "@components/aside";
-import { ref, computed } from "vue";
-import axios from "@utils/request"
+import { ref, computed,onMounted } from "vue";
+import axios from "@utils/request";
+import { usePageStore } from "@stores/public";
+
+const pageStore = usePageStore();
 
 const drawer = ref(false);
 
@@ -84,6 +90,13 @@ const drawerOpened = () => {
     noticeData.value = res.data;
   });
 };
+
+onMounted(() => {
+  // 网页宽度小于540px时，设置aside的宽度为0
+  if (document.body.clientWidth <= 540) {
+    pageStore.showAside = false;
+  }
+});
 </script>
 
 <style scoped lang="scss">
@@ -98,6 +111,18 @@ const drawerOpened = () => {
     width: fit-content;
     background: rgb(48, 65, 86);
     color: rgb(191, 203, 217);
+    z-index: 2;
+  }
+
+  // 给aside添加遮罩层
+  .mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
   }
 
   /* 右侧main */
@@ -141,9 +166,22 @@ const drawerOpened = () => {
   .fade-leave-active {
     transition: opacity 0.5s;
   }
+
   .fade-enter-from,
   .fade-leave-to {
     opacity: 0;
+  }
+}
+
+//侧边栏在设备宽度小于540px时修改Position为absolute
+@media screen and (max-width: 540px) {
+  .container {
+    aside {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
   }
 }
 </style>

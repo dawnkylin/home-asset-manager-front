@@ -1,21 +1,21 @@
-const { DefinePlugin } = require('webpack')
-const { VueLoaderPlugin } = require('vue-loader')
-const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin')
-const ESLintPlugin = require('eslint-webpack-plugin')
-const HTMLPlugin = require('html-webpack-plugin')
-const CopyPlugin = require('copy-webpack-plugin')
+const { DefinePlugin } = require("webpack");
+const { VueLoaderPlugin } = require("vue-loader");
+const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
+const ESLintPlugin = require("eslint-webpack-plugin");
+const HTMLPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 // 按需导入Element plus组件
-const AutoImport = require('unplugin-auto-import/webpack')
-const Components = require('unplugin-vue-components/webpack')
-const { ElementPlusResolver } = require('unplugin-vue-components/resolvers')
+const AutoImport = require("unplugin-auto-import/webpack");
+const Components = require("unplugin-vue-components/webpack");
+const { ElementPlusResolver } = require("unplugin-vue-components/resolvers");
 
-const resolveClientEnv = require('../utils/resolveClientEnv')
-const paths = require('../utils/paths')
+const resolveClientEnv = require("../utils/resolveClientEnv");
+const paths = require("../utils/paths");
 
-const config = require('../project.config')
+const config = require("../project.config");
 
-const isProd = process.env.NODE_ENV === 'production'
-const outputFileName = `js/[name]${isProd ? '.[contenthash:8]' : ''}.js`
+const isProd = process.env.NODE_ENV === "production";
+const outputFileName = `js/[name]${isProd ? ".[contenthash:8]" : ""}.js`;
 
 module.exports = {
   context: process.cwd(),
@@ -66,9 +66,7 @@ module.exports = {
       templateParameters: {
         ...resolveClientEnv(
           {
-            publicPath: isProd
-              ? config.build.publicPath
-              : config.dev.publicPath,
+            publicPath: isProd ? config.build.publicPath : config.dev.publicPath,
           },
           true /* raw */
         ),

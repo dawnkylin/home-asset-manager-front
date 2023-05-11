@@ -198,11 +198,11 @@ export default {
 import { ref, onMounted, watch } from 'vue';
 import { Search, Edit, Delete } from '@element-plus/icons-vue';
 import axios from "@utils/request";
-import { getLocalStorage,setLocalStorage } from '@utils/storage';
+import { getLocalStorage, } from '@utils/storage';
 import { ElNotification } from 'element-plus';
 import * as XLSX from 'xlsx';
 import { useRoute, } from 'vue-router';
-import moment from 'moment';
+// import moment from 'moment';
 
 const isCard = ref(true);
 
@@ -233,7 +233,7 @@ const addForm = ref({
   type: route.meta.type === 'income' ? 1 : 0,
   amount: '',
   createdDate: '',
-  assetSerialNumber: '',
+  homeSerialNumber: getLocalStorage('user').homeSerialNumber,
 });
 
 const addFormRef = ref();
@@ -310,6 +310,7 @@ const handleAdd = () => {
     amount: '',
     createdDate: '',
     assetSerialNumber: '',
+    homeSerialNumber: getLocalStorage('user').homeSerialNumber,
   };
 };
 
@@ -474,6 +475,14 @@ const handleImport = () => {
   input.click();
 };
 const handleExport = () => {
+  if (isCard.value) {
+    ElNotification({
+      title: '提示',
+      message: '卡片模式下无法导出',
+      type: 'warning',
+    });
+    return;
+  }
   // 没有选中的财务
   if (selectedAssets.value.length === 0) {
     ElNotification({
@@ -592,9 +601,9 @@ const getTableData = () => {
     '&type=' + type.value
   ).then((res) => {
     //日期格式处理
-    res.data.list.forEach((item) => {
-      item.createdDate = moment(item.createdDate).format('YYYY-MM-DD');
-    });
+    // res.data.list.forEach((item) => {
+    //   item.createdDate = moment(item.createdDate).format('YYYY-MM-DD');
+    // });
     tableData.value = res.data.list;
     // 延时0.5s
     setTimeout(() => {
@@ -605,15 +614,8 @@ const getTableData = () => {
 };
 
 onMounted(() => {
-  //重新获取用户信息
-  axios.getRequest('/account/getAccountDetail/' + getLocalStorage('user').id).then(res => {
-    if (res.code === 200) {
-      setLocalStorage('user', res.data);
-    }
-  }).then(() => {
-    // 获取表格数据
-    getTableData();
-  });
+  // 获取表格数据
+  getTableData();
 });
 
 // const router = useRouter();

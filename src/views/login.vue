@@ -18,6 +18,10 @@
         还没有账号？
         <el-link @click.prevent="router.push({ name: 'register' })">去注册</el-link>
       </el-form-item>
+      <!-- 忘记密码 -->
+      <el-form-item>
+        <el-link @click.prevent="router.push({ name: 'forgetPwd' })">忘记密码</el-link>
+      </el-form-item>
     </el-form>
     <GithubCornerMark />
   </div>
@@ -32,7 +36,7 @@ import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import button1 from "@components/button1.vue";
 import GithubCornerMark from "@components/github-corner-mark.vue";
-import { isPassword } from "@utils/regex";
+import { isStrongPassword } from "@utils/regex";
 import { Phone, Lock } from "@element-plus/icons-vue";
 import axios from "@utils/request";
 import { useAuthStore } from "@stores/auth";
@@ -61,8 +65,8 @@ const rules = reactive({
     { required: true, message: "请输入密码", trigger: "blur" },
     {
       validator: (rule, value, callback) => {
-        if (!isPassword(value)) {
-          callback(new Error("密码长度不能小于6位，且必须包含数字和字母"));
+        if (!isStrongPassword(value)) {
+          callback("密码长度不能小于6位，且必须包含数字和字母");
         } else {
           callback();
         }

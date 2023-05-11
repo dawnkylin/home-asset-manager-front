@@ -111,11 +111,11 @@
                 审核通知
               </div>
             </el-divider>
-            <el-table :data="verifyNoticeData" style="width: 100%">
+            <el-table :data="verifyNoticeData">
               <el-table-column prop="recipientName" label="审核人姓名" width="120"></el-table-column>
               <el-table-column prop="createdDate" label="申请时间" width="150"></el-table-column>
-              <el-table-column prop="homeSerialNumber" label="申请家庭序列号" min-width="160"></el-table-column>
-              <el-table-column prop="status" width="130">
+              <el-table-column prop="homeSerialNumber" label="申请家庭序列号" width="320"></el-table-column>
+              <el-table-column prop="status" min-width="130">
                 <template #default="{row}">
                   <el-tag type="success" v-if="row.status === '1'">已通过</el-tag>
                   <el-tag type="danger" v-else-if="row.status==='2'">已拒绝</el-tag>
@@ -129,9 +129,9 @@
                 请求加入通知
               </div>
             </el-divider>
-            <el-table :data="joinNoticeData" style="width: 100%">
+            <el-table :data="joinNoticeData">
               <el-table-column prop="applicationName" label="姓名" width="150"></el-table-column>
-              <el-table-column prop="applicationPhone" label="手机号" width="180"></el-table-column>
+              <el-table-column prop="applicationPhone" label="手机号" width="150"></el-table-column>
               <el-table-column prop="status" width="150">
                 <template #default="{ row }">
                   <el-popconfirm title="确定要通过该申请吗？" @confirm="agree(row)">
@@ -197,13 +197,7 @@ const userInfo = ref({
 });
 
 onMounted(() => {
-  //重新获取用户信息
-  axios.getRequest('/account/getAccountDetail/'+getLocalStorage('user').id).then(res => {
-    if (res.code === 200) {
-      setLocalStorage('user', res.data);
-      userInfo.value = res.data;
-    }
-  });
+  userInfo.value = getLocalStorage('user');
 });
 
 const pwdForm = ref({
@@ -216,7 +210,7 @@ const pwdFormRef = ref(null);
 
 const validateConfirmPassword = (rule, value, callback) => {
   if (value !== pwdForm.value.newPassword) {
-    callback(new Error('两次输入密码不一致!'));
+    callback('两次输入密码不一致!');
   } else {
     callback();
   }

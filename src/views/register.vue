@@ -81,7 +81,7 @@ const rules = reactive({
     {
       validator: (rule, value, callback) => {
         if (!isStrongPassword(value)) {
-          callback(new Error("密码长度不能小于6位，且必须包含数字和字母"));
+          callback("密码长度不能小于6位，且必须包含数字、大小写字母和特殊字符");
         } else {
           callback();
         }
@@ -125,6 +125,11 @@ const sendSms = () => {
               }
             }, 1000);
           }
+          //手机号已注册
+          else if (res.code === 1001) {
+            ElMessage.error("手机号已注册");
+            isDisabled.value = false;
+          }
           // 手机号不存在
           else if (res.code === 1007) {
             ElMessage.error("手机号不存在");
@@ -158,9 +163,9 @@ const onSubmit = () => {
           if (res.code === 200) {
             ElMessage.success("注册成功");
             // 1s后跳转到登录页面
-            // setTimeout(() => {
-            //   router.push({ name: "login" });
-            // }, 3000);
+            setTimeout(() => {
+              router.push({ name: "login" });
+            }, 3000);
           }
           else if (res.code === 1001) {
             ElMessage.error("手机号已存在");

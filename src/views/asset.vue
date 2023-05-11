@@ -158,9 +158,8 @@
   <!-- 分页 -->
   <el-row>
     <el-pagination :current-page="currentPage" :page-size="pageSize" :page-sizes="[10, 20, 30, 40]" :total="total"
-      background :layout="'sizes, prev, pager, next, jumper, ->, total, slot'"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"/>
+      background :layout="'sizes, prev, pager, next, jumper, ->, total, slot'" @size-change="handleSizeChange"
+      @current-change="handleCurrentChange" />
   </el-row>
 
   <!-- 添加 Dialog -->
@@ -183,7 +182,7 @@
       </el-form-item>
       <!-- 购买日期 -->
       <el-form-item label="购买日期" prop="purchaseDate">
-        //将三月 2, 2017格式的日期转换为2017-03-02格式
+        <!-- 将三月 2, 2017格式的日期转换为2017-03-02格式 -->
         <el-date-picker v-model="addForm.purchaseDate" type="date" placeholder="选择日期" value-format="YYYY-MM-DD">
         </el-date-picker>
       </el-form-item>
@@ -252,11 +251,11 @@ export default {
 import { ref, onMounted, watch } from 'vue';
 import { Search, DocumentCopy } from '@element-plus/icons-vue';
 import axios from "@utils/request";
-import { getLocalStorage,setLocalStorage } from '@utils/storage';
+import { getLocalStorage,  } from '@utils/storage';
 import { ElNotification } from 'element-plus';
 import * as XLSX from 'xlsx';
 import { useRoute, } from 'vue-router';
-import moment from 'moment';
+// import moment from 'moment';
 
 const isCard = ref(true);
 
@@ -299,10 +298,11 @@ const addForm = ref({
   name: '',
   userId: getLocalStorage('user').id,
   assetTypeId: '',
-  purchasePrice: '',
+  purchasePrice: "",
   purchaseDate: '',
-  currentValue: '',
+  currentValue: "",
   notes: '',
+  homeSerialNumber: getLocalStorage('user').homeSerialNumber,
 });
 
 const addFormRef = ref();
@@ -393,11 +393,12 @@ const handleAdd = () => {
   addForm.value = {
     name: '',
     userId: getLocalStorage('user').id,
-    assetTypeId: '',
-    purchasePrice: '',
-    purchaseDate: '',
-    currentValue: '',
+    assetTypeId: null,
+    purchasePrice: null,
+    purchaseDate: null,
+    currentValue: null,
     notes: '',
+    homeSerialNumber: getLocalStorage('user').homeSerialNumber,
   };
 };
 
@@ -410,13 +411,13 @@ const handleAdd = () => {
 const editDialogVisible = ref(false);
 
 const editForm = ref({
-  id: '',
+  id: null,
   name: '',
   userId: getLocalStorage('user').id,
-  assetTypeId: '',
-  purchasePrice: '',
-  purchaseDate: '',
-  currentValue: '',
+  assetTypeId: null,
+  purchasePrice: null,
+  purchaseDate: null,
+  currentValue: null,
   notes: '',
 });
 
@@ -535,6 +536,14 @@ const handleImport = () => {
   input.click();
 };
 const handleExport = () => {
+  if (isCard.value) {
+    ElNotification({
+      title: '提示',
+      message: '卡片模式下无法导出',
+      type: 'warning',
+    });
+    return;
+  }
   // 没有选中的资产
   if (selectedAssets.value.length === 0) {
     ElNotification({
@@ -626,7 +635,7 @@ const handleBatchDelete = () => {
  */
 const currentPage = ref(1);
 const pageSize = ref(10);
-const total = ref();
+const total = ref(0);
 const handleSizeChange = (val) => {
   pageSize.value = val;
   getTableData();
@@ -658,9 +667,11 @@ const getTableData = () => {
     '&type=' + type.value
   ).then((res) => {
     // 处理日期格式
-    res.data.list.forEach((item) => {
-      item.purchaseDate = moment(item.purchaseDate).format('YYYY-MM-DD');
-    });
+    // res.data.list.forEach((item) => {
+    //   if (item.purchaseDate !==null){
+    //     item.purchaseDate = moment(item.purchaseDate).format('YYYY-MM-DD');
+    //   }
+    // });
     tableData.value = res.data.list;
     setTimeout(() => {
       loading.value = false;
@@ -677,15 +688,8 @@ const getTableData = () => {
 };
 
 onMounted(() => {
-  //重新获取用户信息
-  axios.getRequest('/account/getAccountDetail/' + getLocalStorage('user').id).then(res => {
-    if (res.code === 200) {
-      setLocalStorage('user', res.data);
-    }
-  }).then(() => {
-    // 获取表格数据
-    getTableData();
-  });
+  // 获取表格数据
+  getTableData();
 });
 
 // const router = useRouter();
@@ -719,6 +723,7 @@ watch(
   .card-notes {
     white-space: normal;
     word-break: break-all;
+    max-width: 200px;
     height: fit-content;
   }
 }
