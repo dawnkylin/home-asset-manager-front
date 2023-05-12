@@ -25,7 +25,7 @@ router.beforeEach((to, from, next) => {
     return;
   }
   //无权访问跳转到403页面
-  if (to.meta.role === "admin" && getLocalStorage("user").role === "user") {
+  if (to.meta.role === "admin" && useAuthStore().user.role === "user") {
     next({ name: "forbidden" });
     return;
   }

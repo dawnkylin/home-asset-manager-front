@@ -445,8 +445,8 @@ const agree = (row) => {
 };
 
 const refuse = (row) => {
-  axios.postRequest("/homeRequest/refuseJoinHome?requestId=" + row.requestId +
-    "&homeSerialNumber=" + row.homeSerialNumber).then(res => {
+  axios.postRequest("/homeRequest/refuseJoinHome?requestId=" + row.recipientId +
+    "&joinId=" + row.applicationId).then(res => {
       if (res.code === 200) {
         ElMessage.success("已拒绝");
         getJoinNoticeData();

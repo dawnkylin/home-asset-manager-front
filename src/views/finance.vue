@@ -30,7 +30,7 @@
     <!-- 导出、导入按钮 -->
     <el-col :span="3.5" :xs="24">
       <el-button type="primary" @click="handleExport" size="large">导出</el-button>
-      <el-button type="primary" @click="handleImport" size="large">导入</el-button>
+      <!-- <el-button type="primary" @click="handleImport" size="large">导入</el-button> -->
     </el-col>
     <!-- 选择展示方式 -->
     <el-col :span="3.5" :xs="24">
@@ -418,62 +418,62 @@ const editFormSubmit = () => {
  *
  */
 
-const handleImport = () => {
-  // 创建一个 input 标签
-  const input = document.createElement('input');
-  // 设置 input 标签的 type 属性为 file
-  input.type = 'file';
-  // 监听 input 标签的 change 事件，当文件选择完成后触发
-  input.onchange = async (e) => {
-    // 获取文件, e.target.files[0] 为选择的第一个文件
-    const file = e.target.files[0];
-    // 检查文件类型
-    if (file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-      ElNotification({
-        title: '错误',
-        message: '文件类型错误',
-        type: 'error',
-      });
-      return;
-    }
-    // 读取文件
-    const reader = new FileReader();
-    // 读取文件为二进制字符串
-    reader.readAsBinaryString(file);
-    reader.onload = async (e) => {
-      // 读取完成
-      const data = e.target.result;
-      // 将文件转换为工作簿
-      const wb = XLSX.read(data, { type: 'binary' });
-      // 获取工作表，wb.SheetNames[0] 为第一个工作表的名称
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      // 将工作表转换为 JSON 数组
-      const list = XLSX.utils.sheet_to_json(ws);
-      // 设置userId
-      list.forEach((item) => {
-        item.userId = getLocalStorage('user').id;
-      });
-      // 发送请求导入资产
-      const res = await axios.postRequest('/finance/addFinanceList', list);
-      if (res.code === 200) {
-        ElNotification({
-          title: '成功',
-          message: '导入资产成功',
-          type: 'success',
-        });
-        getTableData();
-      } else {
-        ElNotification({
-          title: '失败',
-          message: res.message,
-          type: 'error',
-        });
-      }
-    };
-  };
-  // 触发 input 标签的 click 事件，打开文件选择框
-  input.click();
-};
+// const handleImport = () => {
+//   // 创建一个 input 标签
+//   const input = document.createElement('input');
+//   // 设置 input 标签的 type 属性为 file
+//   input.type = 'file';
+//   // 监听 input 标签的 change 事件，当文件选择完成后触发
+//   input.onchange = async (e) => {
+//     // 获取文件, e.target.files[0] 为选择的第一个文件
+//     const file = e.target.files[0];
+//     // 检查文件类型
+//     if (file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+//       ElNotification({
+//         title: '错误',
+//         message: '文件类型错误',
+//         type: 'error',
+//       });
+//       return;
+//     }
+//     // 读取文件
+//     const reader = new FileReader();
+//     // 读取文件为二进制字符串
+//     reader.readAsBinaryString(file);
+//     reader.onload = async (e) => {
+//       // 读取完成
+//       const data = e.target.result;
+//       // 将文件转换为工作簿
+//       const wb = XLSX.read(data, { type: 'binary' });
+//       // 获取工作表，wb.SheetNames[0] 为第一个工作表的名称
+//       const ws = wb.Sheets[wb.SheetNames[0]];
+//       // 将工作表转换为 JSON 数组
+//       const list = XLSX.utils.sheet_to_json(ws);
+//       // 设置userId
+//       list.forEach((item) => {
+//         item.userId = getLocalStorage('user').id;
+//       });
+//       // 发送请求导入资产
+//       const res = await axios.postRequest('/finance/addFinanceList', list);
+//       if (res.code === 200) {
+//         ElNotification({
+//           title: '成功',
+//           message: '导入资产成功',
+//           type: 'success',
+//         });
+//         getTableData();
+//       } else {
+//         ElNotification({
+//           title: '失败',
+//           message: res.message,
+//           type: 'error',
+//         });
+//       }
+//     };
+//   };
+//   // 触发 input 标签的 click 事件，打开文件选择框
+//   input.click();
+// };
 const handleExport = () => {
   if (isCard.value) {
     ElNotification({

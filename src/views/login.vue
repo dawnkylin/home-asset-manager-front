@@ -36,7 +36,6 @@ import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import button1 from "@components/button1.vue";
 import GithubCornerMark from "@components/github-corner-mark.vue";
-import { isStrongPassword } from "@utils/regex";
 import { Phone, Lock } from "@element-plus/icons-vue";
 import axios from "@utils/request";
 import { useAuthStore } from "@stores/auth";
@@ -63,16 +62,6 @@ const rules = reactive({
   ],
   password: [
     { required: true, message: "请输入密码", trigger: "blur" },
-    {
-      validator: (rule, value, callback) => {
-        if (!isStrongPassword(value)) {
-          callback("密码长度不能小于6位，且必须包含数字和字母");
-        } else {
-          callback();
-        }
-      },
-      trigger: "blur",
-    },
   ],
 });
 

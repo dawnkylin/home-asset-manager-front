@@ -29,6 +29,12 @@ export default [
         component: () => import("@views/profile"),
         meta: { requiresAuth: true, title: "个人中心", role: "user" },
       },
+      {
+        path: "systemNotices",
+        name: "systemNotices",
+        component: () => import("@views/systemnotices"),
+        meta: { requiresAuth: true, title: "系统通知", role: "admin" },
+      },
     ],
   },
   // 登录

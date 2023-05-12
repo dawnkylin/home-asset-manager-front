@@ -40,6 +40,10 @@
         <span>支出</span>
       </el-menu-item>
     </el-sub-menu>
+    <el-menu-item v-if="authStore.user.role === 'admin'" index="systemNotices">
+      <el-icon><Notification /></el-icon>
+      <template #title>系统公告</template>
+    </el-menu-item>
   </el-menu>
 </template>
 <script>
@@ -50,7 +54,10 @@ export default {
 <script setup>
 import { useRouter,useRoute } from "vue-router";
 import { usePageStore } from "@stores/public";
+import { useAuthStore } from "@stores/auth";
 import { computed } from "vue";
+
+const authStore = useAuthStore();
 
 const pageStore = usePageStore();
 
@@ -70,6 +77,8 @@ const defaultActive = computed(() => {
       return "income";
     case "expenditure":
       return "expenditure";
+    case "systemNotices":
+      return "systemNotices";
     default:
       return "home";
   }
@@ -91,6 +100,9 @@ const handleSelect = (key) => {
       break;
     case "expenditure":
       router.push({ name: "expenditure" });
+      break;
+    case "systemNotices":
+      router.push({ name: "systemNotices" });
       break;
     default:
       break;
