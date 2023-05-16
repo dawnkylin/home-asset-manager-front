@@ -251,11 +251,13 @@ export default {
 import { ref, onMounted, watch } from 'vue';
 import { Search, DocumentCopy } from '@element-plus/icons-vue';
 import axios from "@utils/request";
-import { getLocalStorage,  } from '@utils/storage';
+import { getLocalStorage,setLocalStorage } from '@utils/storage';
 import { ElNotification } from 'element-plus';
 import * as XLSX from 'xlsx';
 import { useRoute, } from 'vue-router';
-// import moment from 'moment';
+import { useAuthStore } from "@stores/auth";
+
+const authStore = useAuthStore();
 
 const isCard = ref(true);
 
@@ -690,6 +692,12 @@ const getTableData = () => {
 onMounted(() => {
   // 获取表格数据
   getTableData();
+  authStore.websocket.onmessage = (e) => {
+    setLocalStorage("user", e.data);
+    const data = JSON.parse(e.data);
+    authStore.user = data;
+    getTableData();
+  };
 });
 
 // const router = useRouter();

@@ -68,7 +68,7 @@ import myHeader from "@components/header";
 import myAside from "@components/aside";
 import { ref, computed,onMounted } from "vue";
 import axios from "@utils/request";
-import { usePageStore } from "@stores/public";
+import { usePageStore,useAuthStore } from "@stores/public";
 
 const pageStore = usePageStore();
 

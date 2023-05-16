@@ -8,6 +8,7 @@ export const usePageStore = defineStore("page", {
     showAsideMask: false,
     route: useRoute(),
     countdown: 0,
+
   }),
   getters: {
     getCurrentPath: (state) => {
@@ -21,5 +22,6 @@ export const usePageStore = defineStore("page", {
         return route.name !== "index"&&route.name !== "home";
       });
     },
+    
   },
 });

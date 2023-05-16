@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 "use strict";
 
 const loadEnv = require("../utils/loadEnv");
@@ -42,4 +43,6 @@ const runServer = async () => {
   });
 };
 
-runServer();
+runServer().then(() => {
+
+});

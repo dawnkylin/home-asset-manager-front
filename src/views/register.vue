@@ -28,9 +28,9 @@
         </el-row>
       </el-form-item>
       <el-form-item>
-        <button1 @click="onSubmit">注册</button1>
+        <button1 @click.prevent="onSubmit">注册</button1>
       </el-form-item>
-      <!-- 去注册 -->
+      <!-- 去登录 -->
       <el-form-item>
         已有账号？
         <el-link @click="router.push({ name: 'login' })">去登录</el-link>

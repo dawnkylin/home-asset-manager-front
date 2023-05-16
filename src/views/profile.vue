@@ -29,7 +29,7 @@
               <span class="family-name subtitle">家庭名</span>
             </el-divider>
             <div class="family-name">
-              {{ userInfo.homeName === '' || userInfo.homeName === undefined ? "尊敬的单身贵族~~" : userInfo.homeName }}
+              {{ userInfo.homeName === '' || userInfo.homeName === undefined|| userInfo.homeName===null ? "尊敬的单身贵族~~" : userInfo.homeName }}
             </div>
           </div>
         </el-card>
@@ -87,7 +87,7 @@
               <el-table-column prop="phone" label="手机号" min-width="180"></el-table-column>
               <el-table-column width="180">
                 <template #default="{ row }">
-                  <el-popconfirm v-if="isCreator && row.id != getLocalStorage('user').id" title="确定要删除该成员吗？"
+                  <el-popconfirm v-if="isCreator && row.id != authStore.user.id" title="确定要删除该成员吗？"
                     @confirm="deleteHomeMember(row)">
                     <template #reference>
                       <el-button type="danger" size="small">删除</el-button>
@@ -97,12 +97,26 @@
               </el-table-column>
             </el-table>
             <el-divider>
-              <div class="subtitle">创建或加入家庭</div>
+              <div class="subtitle">操作</div>
             </el-divider>
             <!-- 打开创建家庭Dialog -->
             <el-button type="primary" @click="createHomeDialogVisible = true">创建我的家庭</el-button>
             <!-- 打开加入家庭Dialog -->
             <el-button type="primary" @click="joinHomeDialogVisible = true">加入家庭</el-button>
+            <!-- 家庭重命名 -->
+            <el-button type="primary" @click="renameHomeDialogVisible = true" v-if="isCreator">重命名家庭</el-button>
+            <!-- 退出家庭 -->
+            <el-popconfirm title="确定要退出该家庭吗？" @confirm="exitHome" v-if="!isCreator">
+              <template #reference>
+                <el-button type="danger">退出家庭</el-button>
+              </template>
+            </el-popconfirm>
+            <!-- 解散家庭 -->
+            <el-popconfirm title="确定要解散该家庭吗？" @confirm="disbandHome" v-if="isCreator">
+              <template #reference>
+                <el-button type="danger">解散家庭</el-button>
+              </template>
+            </el-popconfirm>
           </el-tab-pane>
           <!-- 验证通知和请求加入通知 -->
           <el-tab-pane label="通知" name="fourth">
@@ -116,11 +130,13 @@
               <el-table-column prop="createdDate" label="申请时间" width="150"></el-table-column>
               <el-table-column prop="homeSerialNumber" label="申请家庭序列号" width="320"></el-table-column>
               <el-table-column prop="status" min-width="130">
-                <template #default="{row}">
+                <template #default="{ row }">
                   <el-tag type="success" v-if="row.status === '1'">已通过</el-tag>
-                  <el-tag type="danger" v-else-if="row.status==='2'">已拒绝</el-tag>
-                  <el-tag type="warning" v-else-if="row.status==='0'">待审核</el-tag>
-                  <el-tag type="info" v-else>你已被移除</el-tag>
+                  <el-tag type="danger" v-else-if="row.status === '2'">已拒绝</el-tag>
+                  <el-tag type="warning" v-else-if="row.status === '0'">待审核</el-tag>
+                  <el-tag type="warning" v-else-if="row.status === '3'">被移除</el-tag>
+                  <el-tag type="warning" v-else-if="row.status === '4'">已退出</el-tag>
+                  <el-tag type="warning" v-else-if="row.status === '5'">已解散</el-tag>
                 </template>
               </el-table-column>
             </el-table>
@@ -176,6 +192,18 @@
       </el-form-item>
     </el-form>
   </el-dialog>
+
+  <!-- 重命名家庭的Dialog -->
+  <el-dialog title="重命名家庭" v-model="renameHomeDialogVisible">
+    <el-form :model="renameHomeForm" label-width="100px">
+      <el-form-item label="家庭名">
+        <el-input v-model="renameHomeForm.homeName"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click.prevent="renameHome">提交</el-button>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
 </template>
 <script>
 export default {
@@ -183,10 +211,13 @@ export default {
 }
 </script>
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted,onUnmounted } from "vue";
 import axios from "@utils/request";
 import { ElMessage } from "element-plus";
 import { getLocalStorage, setLocalStorage } from "@utils/storage";
+import { useAuthStore } from "@stores/auth";
+
+const authStore = useAuthStore();
 
 const userInfo = ref({
   username: '',
@@ -197,7 +228,16 @@ const userInfo = ref({
 });
 
 onMounted(() => {
-  userInfo.value = getLocalStorage('user');
+  userInfo.value = authStore.user;
+  authStore.websocket.onmessage = (e) => {
+    setLocalStorage("user", e.data);
+    const data = JSON.parse(e.data);
+    authStore.user = data;
+    userInfo.value = data;
+    getJoinNoticeData();
+    getHomeMembers();
+    getVerifyNoticeData();
+  };
 });
 
 const pwdForm = ref({
@@ -222,11 +262,11 @@ const pwdFormRules = ref({
   ],
   newPassword: [
     { required: true, message: '请输入新密码', trigger: 'blur' },
-    { pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/, message: '至少6位,至少包含一个字母和一个数字', trigger: 'blur' },
+    { pattern:  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,10}$/, message: '6-10位,包含大小写字母和特殊字符', trigger: 'blur' },
   ],
   confirmPassword: [
     { required: true, message: '请再次输入新密码', trigger: 'blur' },
-    { pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/, message: '至少6位,至少包含一个字母和一个数字', trigger: 'blur' },
+    { pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,10}$/, message: '6-10位,包含大小写字母和特殊字符', trigger: 'blur' },
     { validator: validateConfirmPassword, trigger: 'change' },
   ],
 });
@@ -234,18 +274,22 @@ const pwdFormRules = ref({
 const modifyPwd = () => {
   pwdFormRef.value.validate(async (valid) => {
     if (valid) {
-      const res = await axios.postRequest('/auth/updatePassword?oldPwd=' +
-        pwdForm.value.oldPassword + '&newPwd=' +
-        pwdForm.value.newPassword + '&userId=' + getLocalStorage('user').id);
-      if (res.code === 200) {
-        ElMessage.success('修改成功');
-        pwdForm.value = {
-          oldPassword: '',
-          newPassword: '',
-          confirmPassword: '',
-        };
-      } else {
-        ElMessage.error(res.message);
+      try {
+        const res = await axios.postRequest('/auth/updatePassword?oldPwd=' +
+          pwdForm.value.oldPassword + '&newPwd=' +
+          pwdForm.value.newPassword + '&userId=' + authStore.user.id);
+        if (res.code === 200) {
+          ElMessage.success('修改成功');
+          pwdForm.value = {
+            oldPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+          };
+        } else {
+          ElMessage.error(res.message);
+        }
+      } catch (error) {
+        ElMessage.error(error);
       }
     }
   });
@@ -262,20 +306,34 @@ const homeMembersTable = ref([]);
 const verifyNoticeData = ref([]);
 
 const getVerifyNoticeData = async () => {
-  const res = await axios.getRequest('/homeRequest/getRequestList/' +
-  getLocalStorage('user').id);
-  if (res.code === 200) {
-    verifyNoticeData.value = res.data;
+  try {
+    const res = await axios.getRequest('/homeRequest/getRequestList/' +
+      authStore.user.id);
+    if (res.code === 200) {
+      verifyNoticeData.value = res.data;
+    }
+    else {
+      ElMessage.error(res.message);
+    }
+  } catch (error) {
+    ElMessage.error(error);
   }
 };
 
 const joinNoticeData = ref([]);
 
 const getJoinNoticeData = async () => {
-  const res = await axios.getRequest('/homeRequest/getUnhandledRequestList/' +
-  getLocalStorage('user').id);
-  if (res.code === 200) {
-    joinNoticeData.value = res.data;
+  try {
+    const res = await axios.getRequest('/homeRequest/getUnhandledRequestList/' +
+      authStore.user.id);
+    if (res.code === 200) {
+      joinNoticeData.value = res.data;
+    }
+    else {
+      console.log(res.message);
+    }
+  } catch (error) {
+    ElMessage.error(error);
   }
 };
 
@@ -299,13 +357,16 @@ const updateUserInfo = () => {
         axios.postRequest("/account/updateAccount", userInfo.value).then(res => {
           if (res.code === 200) {
             setLocalStorage('user', userInfo.value);
+            authStore.user = userInfo.value;
             ElMessage.success("修改成功");
           }
           else {
-            userInfo.value = getLocalStorage('user');
+            userInfo.value = authStore.user;
             ElMessage.error("修改失败");
           }
-        });
+        }).catch(error => {
+          ElMessage.error(error);
+        })
         isDisabled.value = true;
         btnName.value = "编辑";
       }
@@ -316,26 +377,28 @@ const updateUserInfo = () => {
 const resetUserInfo = () => {
   btnName.value = "编辑";
   isDisabled.value = true;
-  userInfo.value = getLocalStorage('user');
+  userInfo.value = authStore.user;
 };
 
 const isCreator = ref(false);
 
 const tabChange = (tabName) => {
   if (tabName === "third") {
-    if (getLocalStorage('user').homeSerialNumber === null) {
+    if (authStore.user.homeSerialNumber === null) {
       // ElMessage.error("您还没有加入家庭");
       return;
     }
-    axios.getRequest("/home/isHomeCreator?homeSerialNumber=" + getLocalStorage('user').homeSerialNumber +
-      "&userId=" + getLocalStorage('user').id).then(res => {
+    axios.getRequest("/home/isHomeCreator?homeSerialNumber=" + authStore.user.homeSerialNumber +
+      "&userId=" + authStore.user.id).then(res => {
         isCreator.value = res.data;
+      }).catch(error => {
+        ElMessage.error(error);
       });
     getHomeMembers();
   }
   else if (tabName === "fourth") {
     getJoinNoticeData();
-    if (getLocalStorage('user').homeSerialNumber != null) {
+    if (authStore.user.homeSerialNumber != null) {
       return;
     }
     //没有家庭才能发起加入请求
@@ -379,11 +442,12 @@ const createHome = () => {
     return;
   }
   axios.postRequest("/home/createHome/" +
-    getLocalStorage('user').id + '?homeName=' + newHomeForm.value.homeName)
+    authStore.user.id + '?homeName=' + newHomeForm.value.homeName)
     .then(res => {
       if (res.code === 200) {
         ElMessage.success("创建成功");
         createHomeDialogVisible.value = false;
+        isCreator.value = true;
         newHomeForm.value = {
           homeName: ""
         };
@@ -411,7 +475,7 @@ const joinHome = () => {
     return;
   }
   axios.postRequest("/homeRequest/joinHome/" +
-    getLocalStorage('user').id + '?homeSerialNumber=' + joinHomeForm.value.homeSerialNumber)
+    authStore.user.id + '?homeSerialNumber=' + joinHomeForm.value.homeSerialNumber)
     .then(res => {
       if (res.code === 200) {
         ElMessage.success("请求发送成功！");
@@ -441,7 +505,9 @@ const agree = (row) => {
       else {
         ElMessage.error(res.message);
       }
-    });
+    }).catch(err => {
+      ElMessage.error(err.message);
+    })
 };
 
 const refuse = (row) => {
@@ -454,6 +520,67 @@ const refuse = (row) => {
       else {
         ElMessage.error(res.message);
       }
+    }).catch(err => {
+      ElMessage.error(err.message);
+    });
+};
+
+//重命名家庭
+const renameHomeDialogVisible = ref(false);
+
+const renameHomeForm = ref({
+  homeName: ""
+});
+
+const renameHome = () => {
+  axios.postRequest("/home/renameHome/"+userInfo.value.id+"?homeSerialNumber=" + authStore.user.homeSerialNumber +
+    "&homeName=" + renameHomeForm.value.homeName).then(res => {
+      if (res.code === 200) {
+        ElMessage.success("修改成功");
+        renameHomeDialogVisible.value = false;
+        renameHomeForm.value = {
+          homeName: ""
+        };
+        userInfo.value.username = renameHomeForm.value.homeName;
+        setLocalStorage('user', userInfo.value);
+      }
+      else {
+        ElMessage.error(res.message);
+      }
+    }).catch(err => {
+      ElMessage.error(err.message);
+    });
+};
+
+//退出家庭
+const exitHome = () => {
+  axios.postRequest("/account/quitHome/" + authStore.user.id).then(res => {
+      if (res.code === 200) {
+        ElMessage.success("退出成功");
+        userInfo.value.homeSerialNumber = null;
+        setLocalStorage('user', userInfo.value);
+      }
+      else {
+        ElMessage.error(res.message);
+      }
+    }).catch(err => {
+      ElMessage.error(err.message);
+    });
+};
+
+//解散家庭
+const disbandHome = () => {
+  axios.postRequest("/account/disbandHome/"  +authStore.user.id).then(res => {
+      if (res.code === 200) {
+        ElMessage.success("解散成功");
+        userInfo.value.homeSerialNumber = null;
+        setLocalStorage('user', userInfo.value);
+      }
+      else {
+        ElMessage.error(res.message);
+      }
+    }).catch(err => {
+      ElMessage.error(err.message);
     });
 };
 </script>

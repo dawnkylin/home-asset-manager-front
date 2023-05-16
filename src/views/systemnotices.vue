@@ -48,7 +48,7 @@
   <el-dialog title="添加公告" v-model="addSystemNoticeDialogVisible" width="30%" align-center>
     <el-form :model="addSystemNoticeForm" label-width="auto" @keydown.enter.prevent>
       <el-form-item label="内容" prop="content">
-        <el-input v-model="addSystemNoticeForm.content" type="textarea" :autosize="{ minRows: 2, maxRows: 4 }"></el-input>
+        <el-input v-model="addSystemNoticeForm.content" type="textarea" autosize></el-input>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -75,46 +75,24 @@ export default {
 };
 </script>
 <script setup>
-import { ref, reactive,onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "@utils/request.js"
 import { ElMessage } from "element-plus";
 
-const systemNotices = reactive([
-  {
-    id: 1,
-    content: "系统公告1",
-    createdDate: "2021-10-01",
-  },
-  {
-    id: 2,
-    content: "系统公告2",
-    createdDate: "2021-10-02",
-  },
-  {
-    id: 3,
-    content: "系统公告3",
-    createdDate: "2021-10-03",
-  },
-  {
-    id: 4,
-    content: "系统公告4",
-    createdDate: "2021-10-04",
-  },
-  {
-    id: 5,
-    content: "系统公告5",
-    createdDate: "2021-10-05",
-  },
-]);
+const systemNotices = ref([]);
 
 const addSystemNoticeDialogVisible = ref(false);
 const addSystemNoticeForm = ref({
+  id:"",
   content: "",
+  createdDate:""
 });
 
 const editSystemNoticeDialogVisible = ref(false);
 const editSystemNoticeForm = ref({
+  id:"",
   content: "",
+  createdDate:""
 });
 
 const addSystemNotice = () => {
@@ -124,10 +102,12 @@ const addSystemNotice = () => {
 // 添加系统公告表单提交
 const addSystemNoticeFormSubmit = () => {
   //发送提交请求
-  axios.postRequest("/notice/addNotice", addSystemNotice)
+  axios.postRequest("/notice/addNotice", addSystemNoticeForm.value)
     .then(res => {
       if (res.code === 200) {
         ElMessage.success("添加成功！");
+        //重新获取全部公告
+        getTableData();
       }
       else ElMessage.error(res.message);
     })
@@ -136,17 +116,22 @@ const addSystemNoticeFormSubmit = () => {
 
 const editSystemNotice = (row) => {
   editSystemNoticeDialogVisible.value = true;
-  editSystemNoticeForm.value.content = row.content;
+  //将row的属性值赋值给editSystemNoticeForm
+  editSystemNoticeForm.value.id = row.id
+  editSystemNoticeForm.value.content = row.content
+  editSystemNoticeForm.value.createdDate = row.createdDate
   console.log(row.content)
 };
 
 // 编辑系统公告表单提交
 const editSystemNoticeFormSubmit = () => {
   //发送提交请求
-  axios.postRequest("/notice/updateNotice", editSystemNotice)
+  axios.postRequest("/notice/updateNotice", editSystemNoticeForm.value)
     .then(res => {
       if (res.code === 200) {
-        ElMessage.success("编辑成功！");
+        ElMessage.success("修改成功！");
+        //重新获取全部公告
+        getTableData();
       }
       else ElMessage.error(res.message);
     })
@@ -156,10 +141,12 @@ const editSystemNoticeFormSubmit = () => {
 // 删除系统公告
 const deleteSystemNotice = (row) => {
   //发送删除请求
-  axios.postRequest("/notice/deleteNotice", row.id)
+  axios.postRequest("/notice/deleteNotice/"+ row.id)
     .then(res => {
       if (res.code === 200) {
         ElMessage.success("删除成功！");
+        //重新获取全部公告
+        getTableData();
       }
       else ElMessage.error(res.message);
     })
@@ -176,7 +163,7 @@ const getTableData = () => {
     });
 }
 
-onMounted  (() => {
+onMounted(() => {
   //获取全部公告
   getTableData();
 })

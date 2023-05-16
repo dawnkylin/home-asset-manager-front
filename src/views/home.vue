@@ -53,9 +53,10 @@ export default {
 import { onMounted, ref, onBeforeUnmount,computed } from "vue";
 import * as echarts from "echarts";
 import { useRouter } from "vue-router";
-import { getLocalStorage } from "@utils/storage";
+import { getLocalStorage,setLocalStorage } from "@utils/storage";
 import axios from "@utils/request";
 import debounce from "lodash/debounce";
+import { useAuthStore } from "@stores/auth";
 // eslint-disable-next-line no-unused-vars
 const vintageImport = () => import("@assets/echarts_theme/vintage");
 // eslint-disable-next-line no-unused-vars
@@ -82,6 +83,8 @@ const essosImport = () => import("@assets/echarts_theme/essos");
 const purplePassionImport = () => import("@assets/echarts_theme/purple-passion");
 
 const router = useRouter();
+
+const authStore = useAuthStore();
 
 // tabList包含当前年在内的最近三年的年份
 const yearTabList = ref([
@@ -445,6 +448,31 @@ const renderChart3 = () => {
 let resizeObserver = null;
 
 onMounted(() => {
+  authStore.websocket.onmessage = (e) => {
+    setLocalStorage("user", e.data);
+    const data = JSON.parse(e.data);
+    authStore.user = data;
+    // 等请求数据完成再渲染图表
+    Promise.all([getIncomeData(), getExpenseData(), getFixedData(), getFluidData()]).then(() => {
+      renderChart1();
+      renderChart2();
+      renderChart3();
+    }).then(() => {
+      //监听chart1、chart2、chart3尺寸变化，重绘图表
+      resizeObserver = new ResizeObserver(() => {
+        //使用lodash的防抖函数，避免频繁使用echarts实例的resize方法
+        debounce(() => {
+          myChart1.value.resize();
+          myChart2.value.resize();
+          myChart3.value.resize();
+        }, 500)();
+      });
+      resizeObserver.observe(chart1.value);
+      resizeObserver.observe(chart2.value);
+      resizeObserver.observe(chart3.value);
+
+    });
+  }
   // 等请求数据完成再渲染图表
   Promise.all([getIncomeData(), getExpenseData(), getFixedData(), getFluidData()]).then(() => {
     renderChart1();

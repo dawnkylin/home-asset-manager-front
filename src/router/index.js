@@ -36,12 +36,12 @@ router.beforeEach((to, from, next) => {
         next({ name: "login" });
       } else {
         //每次跳转重新获取用户信息
-        axios.getRequest("/account/getAccountDetail/" + getLocalStorage("user").id).then((res) => {
-          if (res.code === 200) {
-            useAuthStore().user = res.data;
-            setLocalStorage("user", res.data);
-          }
-        });
+        // axios.getRequest("/account/getAccountDetail/" + getLocalStorage("user").id).then((res) => {
+        //   if (res.code === 200) {
+        //     useAuthStore().user = res.data;
+        //     setLocalStorage("user", res.data);
+        //   }
+        // });
         next();
       }
     });
@@ -50,12 +50,12 @@ router.beforeEach((to, from, next) => {
     axios.getRequest("/auth/isLogin").then((res) => {
       if (res.success) {
         //每次跳转重新获取用户信息
-        axios.getRequest("/account/getAccountDetail/" + getLocalStorage("user").id).then((res) => {
-          if (res.code === 200) {
-            useAuthStore().user = res.data;
-            setLocalStorage("user", res.data);
-          }
-        });
+        // axios.getRequest("/account/getAccountDetail/" + getLocalStorage("user").id).then((res) => {
+        //   if (res.code === 200) {
+        //     useAuthStore().user = res.data;
+        //     setLocalStorage("user", res.data);
+        //   }
+        // });
         next({ name: "home" });
       } else {
         next();

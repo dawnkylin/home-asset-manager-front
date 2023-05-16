@@ -29,20 +29,25 @@ module.exports = merge(baseWebpackConfig, cssWebpackConfig, {
       // cpolar内网穿透地址 http://127.0.0.1:9200/
       "66e75844.r10.cpolar.top",
     ],
-    // 代理解决跨域问题
+    // 代理
     proxy: {
-      "/ham/background": {
+      "/ham/backend": {
         target: "http://127.0.0.1:9999",
-        secure: false,
+        changeOrigin: true,
+        ws: true,
       },
+    },
+    client: {
+      logging: "error",
+      overlay: false,
     },
   },
 
-  infrastructureLogging: {
-    // 仅显示警告和错误
-    level: "warn",
-  },
-
-  // 精确地控制 bundle 信息该怎么显示
+  //仅显示错误
   stats: "errors-only",
+  //用于基础设施水平的日志选项。
+  infrastructureLogging: {
+    level: "error",
+    appendOnly: true,
+  },
 });

@@ -82,9 +82,9 @@ const onSubmit = () => {
             if (redirect) {
               router.push({ path: redirect });
             } else {
+              authStore.connectWebSocket();
               router.push({ path: "/" });
             }
-            router.push({ path: "/" });
           }
           // 用户名或密码错误
           else if (res.code === 1006) {

@@ -63,8 +63,7 @@
   <!-- 以卡片形式显示数据 -->
   <el-row>
     <el-space v-show="isCard" wrap>
-      <el-card class="box-card" v-for="item in tableData" :key="item.id"
-        :body-style="{ padding: '20px'}">
+      <el-card class="box-card" v-for="item in tableData" :key="item.id" :body-style="{ padding: '20px' }">
         <template #header>
           <div class="card-header">
             <span>{{ item.name }}</span>
@@ -81,25 +80,25 @@
         </template>
         <div class="card-body">
           <div>
-              <el-tag type="success">金额</el-tag>
-              <span>{{ item.amount }}</span>
-            </div>
-            <div>
-              <el-tag type="success">记录日期</el-tag>
-              <span>{{ item.createdDate }}</span>
-            </div>
-            <div>
-              <el-tag type="success">创建者</el-tag>
-              <span>{{ item.userName }}</span>
-            </div>
-            <div>
-              <el-tag type="success">备注</el-tag>
-              <span class="card-text-break">{{ item.notes }}</span>
-            </div>
-            <div>
-              <el-tag type="success">关联资产序列号</el-tag>
-              <span class="card-text-break">{{ item.assetSerialNumber }}</span>
-            </div>
+            <el-tag type="success">金额</el-tag>
+            <span>{{ item.amount }}</span>
+          </div>
+          <div>
+            <el-tag type="success">记录日期</el-tag>
+            <span>{{ item.createdDate }}</span>
+          </div>
+          <div>
+            <el-tag type="success">创建者</el-tag>
+            <span>{{ item.userName }}</span>
+          </div>
+          <div>
+            <el-tag type="success">备注</el-tag>
+            <span class="card-text-break">{{ item.notes }}</span>
+          </div>
+          <div>
+            <el-tag type="success">关联资产序列号</el-tag>
+            <span class="card-text-break">{{ item.assetSerialNumber }}</span>
+          </div>
         </div>
       </el-card>
     </el-space>
@@ -198,11 +197,13 @@ export default {
 import { ref, onMounted, watch } from 'vue';
 import { Search, Edit, Delete } from '@element-plus/icons-vue';
 import axios from "@utils/request";
-import { getLocalStorage, } from '@utils/storage';
+import { getLocalStorage,setLocalStorage } from '@utils/storage';
 import { ElNotification } from 'element-plus';
 import * as XLSX from 'xlsx';
 import { useRoute, } from 'vue-router';
-// import moment from 'moment';
+import { useAuthStore } from '@stores/auth';
+
+const authStore = useAuthStore();
 
 const isCard = ref(true);
 
@@ -521,12 +522,12 @@ const handleExport = () => {
  */
 
 const handleDelete = (row) => {
-  // 删除资产
-  axios.postRequest('/asset/deleteAsset/' + row.id).then((res) => {
+  // 删除财务
+  axios.postRequest('/finance/deleteFinance/' + row.id).then((res) => {
     if (res.code === 200) {
       ElNotification({
         title: '成功',
-        message: '删除资产成功',
+        message: '删除财务成功',
         type: 'success',
       });
       getTableData();
@@ -543,16 +544,16 @@ const handleSelectionChange = (val) => {
 };
 
 const handleBatchDelete = () => {
-  // 没有选中的资产
+  // 没有选中的财务
   if (selectedAssets.value.length === 0) {
     ElNotification({
       title: '警告',
-      message: '请先选择要删除的资产',
+      message: '请先选择要删除的财务',
       type: 'warning',
     });
     return;
   }
-  // 发送请求批量删除选中的资产
+  // 发送请求批量删除选中的财务
   const assetIdList = [];
   selectedAssets.value.forEach((item) => {
     assetIdList.push(item.id);
@@ -561,7 +562,7 @@ const handleBatchDelete = () => {
     if (res.code === 200) {
       ElNotification({
         title: '成功',
-        message: '批量删除资产成功',
+        message: '批量删除财务成功',
         type: 'success',
       });
       getTableData();
@@ -616,6 +617,12 @@ const getTableData = () => {
 onMounted(() => {
   // 获取表格数据
   getTableData();
+  authStore.websocket.onmessage = (e) => {
+    setLocalStorage("user", e.data);
+    const data = JSON.parse(e.data);
+    authStore.user = data;
+    getTableData();
+  };
 });
 
 // const router = useRouter();
@@ -658,10 +665,12 @@ watch(
     max-width: 200px;
     display: inline-block;
   }
-  .card-body{
-    &>div{
+
+  .card-body {
+    &>div {
       margin-bottom: .5rem;
-      >span{
+
+      >span {
         margin-left: .5rem;
       }
     }

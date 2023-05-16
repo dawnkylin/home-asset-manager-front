@@ -20,5 +20,6 @@ module.exports = {
   // rules 指定了一些自定义的规则，这里包括了最大行长度、
   rules: {
     "max-len": ["error", { code: 200 }],
+    "no-unused-vars": "off",
   },
 };
