@@ -228,9 +228,15 @@ const userInfo = ref({
 });
 
 onMounted(() => {
-  userInfo.value = authStore.user;
+  if(!authStore.user) {
+    authStore.user = JSON.parse(getLocalStorage("user"));
+  }
+  else {
+    userInfo.value = authStore.user;
+  }
   authStore.websocket.onmessage = (e) => {
     setLocalStorage("user", e.data);
+    console.log(getLocalStorage("user"));
     const data = JSON.parse(e.data);
     authStore.user = data;
     userInfo.value = data;
@@ -451,9 +457,6 @@ const createHome = () => {
         newHomeForm.value = {
           homeName: ""
         };
-        userInfo.value.username = newHomeForm.value.homeName;
-        userInfo.value.homeSerialNumber = res.data;
-        setLocalStorage('user', userInfo.value);
       }
       else {
         ElMessage.error(res.message);
@@ -541,8 +544,6 @@ const renameHome = () => {
         renameHomeForm.value = {
           homeName: ""
         };
-        userInfo.value.username = renameHomeForm.value.homeName;
-        setLocalStorage('user', userInfo.value);
       }
       else {
         ElMessage.error(res.message);
@@ -558,7 +559,6 @@ const exitHome = () => {
       if (res.code === 200) {
         ElMessage.success("退出成功");
         userInfo.value.homeSerialNumber = null;
-        setLocalStorage('user', userInfo.value);
       }
       else {
         ElMessage.error(res.message);
