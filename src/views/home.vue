@@ -13,13 +13,62 @@
       </el-col>
     </el-row>
     <!-- 点击切换ECharts主题 -->
-    <el-divider content-position="center">主题切换 -- {{ curTheme }}</el-divider>
-    <!-- 使用一个个tab不美观，使用下拉框 -->
-    <el-select v-model="curTheme" placeholder="切换图表主题" @change="themeChange">
-      <el-option v-for="item in themeList" :key="item.index" :label="item.content" :value="item.content">
-        <el-tag type="success">{{ item.content }}</el-tag>
-      </el-option>
-    </el-select>
+    <el-divider content-position="center">总览 -- {{ curTheme }}</el-divider>
+    <!-- 家庭总资产、家庭成员人数、固定资产总数、流动资产总数 -->
+    <el-row>
+      <!-- 使用一个个tab不美观，使用下拉框 -->
+      <el-col :span="24">
+        <el-select v-model="curTheme" placeholder="切换图表主题" @change="themeChange">
+          <el-option v-for="item in themeList" :key="item.index" :label="item.content" :value="item.content">
+            <el-tag type="success">{{ item.content }}</el-tag>
+          </el-option>
+        </el-select>
+      </el-col>
+      <el-col :span="6" :xs="24">
+        <el-card shadow="hover" class="box-card">
+          <div class="text item">
+            <el-icon>
+              <WalletFilled />
+            </el-icon>
+            <span>家庭资产总额</span><br>
+            <span style="color: rgb(214, 141, 46);">¥ {{ totalAssetValue }}</span>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6" :xs="24">
+        <el-card shadow="hover" class="box-card">
+          <div class="text item">
+            <el-icon>
+              <User />
+            </el-icon>
+            <span>家庭成员人数</span><br>
+            <span style="color: rgb(214, 141, 46);">{{ familyMemberNum }}</span>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6" :xs="24">
+        <el-card shadow="hover" class="box-card">
+          <div class="text item">
+            <el-icon>
+              <WalletFilled />
+            </el-icon>
+            <span>固定资产总额</span><br>
+            <span style="color: rgb(214, 141, 46);">¥ {{ fixedAssetValue }}</span>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6" :xs="24">
+        <el-card shadow="hover" class="box-card">
+          <div class="text item">
+            <el-icon>
+              <WalletFilled />
+            </el-icon>
+            <span>流动资产总额</span><br>
+            <span style="color: rgb(214, 141, 46);">¥ {{ fluidAssetValue }}</span>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
     <el-divider content-position="center">资产分析</el-divider>
     <el-row>
       <el-col :span="12" :xs="24">
@@ -32,14 +81,59 @@
       </el-col>
     </el-row>
     <el-divider content-position="center">收支分析</el-divider>
-    <!-- 选择不同年份 -->
-    <el-tooltip effect="dark" content="点击切换年份" placement="top" v-for="tab in yearTabList" :key="tab.index">
-      <div class="tab" v-html="tab.content" @click="yearTabClick"></div>
-    </el-tooltip>
     <el-row>
-      <!-- 收支图：不同月份的月收入和月支出 -->
+      <el-col>
+        <!-- 选择不同年份 -->
+        <el-tooltip effect="dark" content="点击切换年份" placement="top" v-for="tab in yearTabList" :key="tab.index">
+          <div class="tab" v-html="tab.content" @click="yearTabClick"></div>
+        </el-tooltip>
+      </el-col>
+      <!-- 年收支图：不同月份的月收入和月支出 -->
       <el-col :span="24" :xs="24">
         <div ref="chart1" style="height: 500px"></div>
+      </el-col>
+      <!-- 总收入、总支出、结余 -->
+      <el-col :span="6" :xs="24">
+        <el-card shadow="hover" class="box-card">
+          <div class="text item">
+            <el-icon>
+              <WalletFilled />
+            </el-icon>
+            <span>总收入</span><br>
+            <span style="color: rgb(214, 141, 46);">¥ {{ totalIncome }}</span>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6" :xs="24">
+        <el-card shadow="hover" class="box-card">
+          <div class="text item">
+            <el-icon>
+              <WalletFilled />
+            </el-icon>
+            <span>总支出</span><br>
+            <span style="color: rgb(214, 141, 46);">¥ {{ totalExpenditure }}</span>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6" :xs="24">
+        <el-card shadow="hover" class="box-card">
+          <div class="text item">
+            <el-icon>
+              <WalletFilled />
+            </el-icon>
+            <span>结余</span><br>
+            <span style="color: rgb(214, 141, 46);">¥ {{ balance }}</span>
+          </div>
+        </el-card>
+      </el-col>
+      <!-- 使用时间选择器选择时间段 -->
+      <el-col :span="24" :xs="24">
+        <el-date-picker v-model="dateRange" type="daterange" unlink-panels range-separator="至" start-placeholder="开始日期"
+          end-placeholder="结束日期" align="right" @change="debounceDateChange" value-format="YYYY-MM-DD"></el-date-picker>
+      </el-col>
+      <!-- 指定时间段的收支图 -->
+      <el-col :span="24" :xs="24">
+        <div ref="chart4" style="height: 500px"></div>
       </el-col>
     </el-row>
   </div>
@@ -50,13 +144,14 @@ export default {
 };
 </script>
 <script setup>
-import { onMounted, ref, onBeforeUnmount,computed } from "vue";
+import { onMounted, ref, onBeforeUnmount, computed } from "vue";
 import * as echarts from "echarts";
 import { useRouter } from "vue-router";
-import { getLocalStorage,setLocalStorage } from "@utils/storage";
+import { getLocalStorage, setLocalStorage } from "@utils/storage";
 import axios from "@utils/request";
 import debounce from "lodash/debounce";
 import { useAuthStore } from "@stores/auth";
+import { get } from "lodash";
 // eslint-disable-next-line no-unused-vars
 const vintageImport = () => import("@assets/echarts_theme/vintage");
 // eslint-disable-next-line no-unused-vars
@@ -132,9 +227,10 @@ const themeChange = async (value) => {
   renderChart1();
   renderChart2();
   renderChart3();
+  drawFinanceChart();
 };
 
-const curTheme = ref('light');
+const curTheme = ref('dark');
 
 const chart1 = ref();
 
@@ -142,24 +238,32 @@ const chart2 = ref();
 
 const chart3 = ref();
 
+const chart4 = ref();
+
 const myChart1 = computed(() => {
-  if(myChart1.value!=null){
+  if (myChart1.value != null) {
     myChart1.value.dispose();
   }
   return echarts.init(chart1.value, curTheme.value);
-},[curTheme]);
+}, [curTheme]);
 const myChart2 = computed(() => {
-  if(myChart2.value!=null){
+  if (myChart2.value != null) {
     myChart2.value.dispose();
   }
   return echarts.init(chart2.value, curTheme.value);
-},[curTheme]);
+}, [curTheme]);
 const myChart3 = computed(() => {
-  if(myChart3.value!=null){
+  if (myChart3.value != null) {
     myChart3.value.dispose();
   }
   return echarts.init(chart3.value, curTheme.value);
-},[curTheme]);
+}, [curTheme]);
+const myChart4 = computed(() => {
+  if (myChart4.value != null) {
+    myChart4.value.dispose();
+  }
+  return echarts.init(chart4.value, curTheme.value);
+}, [curTheme]);
 
 const incomeData = ref([]);
 
@@ -173,6 +277,14 @@ const getIncomeData = async () => {
 const getExpenseData = async () => {
   const res = await axios.getRequest("/finance/getExpenseByYear/" + getLocalStorage("user").id + "/" + curYear.value);
   expenseData.value = res.data;
+};
+
+const getFinancialDataByTimeRange = async () => {
+  const res = await axios.getRequest("/finance/getFinancialDataByTimeRange" +
+    "?userId=" + getLocalStorage("user").id +
+    "&startDate=" + dateRange.value[0] +
+    "&endDate=" + dateRange.value[1]);
+  financeData.value = res.data;
 };
 
 const fixedData = ref([]);
@@ -444,8 +556,206 @@ const renderChart3 = () => {
   };
   myChart3.value.setOption(option, true);
 };
+const drawFinanceChart = () => {
+  // 提取时间和金额数据
+  const date = financeData.value.map(item => item.date);
+  const income = financeData.value.map(item => item.income);
+  const expenditure = financeData.value.map(item => -item.expenditure);
+
+  // 调整时间间隔的显示
+  // const xAxisData = adjustTimeIntervals(date);
+
+  // 设置图表配置项
+  const options = {
+    title: {
+      text: '财务统计图',
+      textStyle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+      },
+    },
+    legend: {
+      data: ['收入', '支出'],
+      textStyle: {
+        fontSize: 12,
+      },
+    },
+    tooltip: {
+      trigger: 'axis',
+      formatter: function (params) {
+        const dataIndex = params[0].dataIndex;
+        const incomeValue = income[dataIndex];
+        const expenditureValue = expenditure[dataIndex];
+        return `日期：${date[dataIndex]}<br>收入：${incomeValue}元<br>支出：${-expenditureValue.toFixed(2)}元
+        <br>结余：${(incomeValue + expenditureValue).toFixed(2)}元`;
+      },
+    },
+    xAxis: {
+      type: 'category',
+      data: date,
+      axisLabel: {
+        rotate: 45, // 旋转x轴标签，避免重叠
+        fontSize: 12,
+      },
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        fontSize: 12,
+      },
+    },
+    dataZoom: [
+      {
+        type: 'inside', // 内置的数据缩放
+        start: 0, // 默认起始位置
+        end: 100, // 默认结束位置
+        zoomOnMouseWheel: 'shift', // 按住Shift键进行鼠标滚轮缩放
+      },
+      {
+        type: 'slider', // 数据缩放滑动条
+        start: 0, // 默认起始位置
+        end: 100, // 默认结束位置
+      },
+    ],
+    toolbox: {
+      feature: {
+        dataZoom: {
+          yAxisIndex: 'none'
+        },
+        restore: {},
+        saveAsImage: {}
+      }
+    },
+    series: [
+      {
+        name: '收入',
+        type: 'line',
+        data: income,
+        smooth: true, // 平滑曲线
+        sampling: 'lttb',// 降采样，减少数据量，提高性能
+        markLine: {
+          data: [
+            { type: 'average', name: '平均值' },
+          ],
+        },
+        markPoint: {
+          data: [
+            { type: 'max', name: '最大值' },
+            { type: 'min', name: '最小值' },
+          ],
+        },
+        itemStyle: {
+          color: '#1890FF',
+        },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            {
+              offset: 0,
+              color: 'rgb(100, 241, 200)'
+            },
+            {
+              offset: 1,
+              color: 'rgb(10, 150, 200)'
+            }
+          ])
+        },
+      },
+      {
+        name: '支出',
+        type: 'line',
+        data: expenditure,
+        smooth: true, // 平滑曲线
+        sampling: 'lttb',// 降采样
+        markLine: {
+          data: [
+            { type: 'average', name: '平均值' },
+          ],
+        },
+        markPoint: {
+          data: [
+            { type: 'max', name: '最大值' },
+            { type: 'min', name: '最小值' },
+          ],
+        },
+        itemStyle: {
+          color: '#FF4D4F',
+        },
+        areaStyle: {
+
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            {
+              offset: 0,
+              color: 'rgb(255, 158, 68)'
+            },
+            {
+              offset: 1,
+              color: 'rgb(255, 70, 131)'
+            }
+          ])
+        },
+      },
+    ],
+  };
+  // 绘制图表
+  myChart4.value.setOption(options);
+}
 
 let resizeObserver = null;
+
+//随机财务数据示例
+const financeData = ref([]);
+
+const adjustTimeIntervals = (time) => {
+  const interval = Math.ceil(time.length / 8); // 设置时间间隔的显示，这里以每8个日期显示一个日期为例
+  const xAxisData = [];
+  for (let i = 0; i < time.length; i += interval) {
+    xAxisData.push(time[i]);
+  }
+  return xAxisData;
+}
+
+//获取日期的YYYY-MM-DD格式
+const getFormatDate = (date) => {
+  let year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  let day = date.getDate();
+  return year + "-" + month + "-" + day;
+}
+//获取距离今天一个月前的日期
+const getOneMonthAgoDate = () => {
+  let date = new Date();
+  date.setMonth(date.getMonth() - 1);
+  return getFormatDate(date);
+}
+const dateRange = ref([getOneMonthAgoDate(), getFormatDate(new Date())]);
+
+const debounceDateChange = debounce(() => {
+  // 等请求数据getIncomeData、getExpenseData完成再渲染图表
+  Promise.all([getFinancialDataByTimeRange()]).then(() => {
+    drawFinanceChart();
+  });
+}, 500);
+
+const totalAssetValue = ref(0);
+const fixedAssetValue = ref(0);
+const fluidAssetValue = ref(0);
+const familyMemberNum = ref(0);
+const totalIncome = ref(0);
+const totalExpenditure = ref(0);
+const balance = ref(0);
+
+//获取家庭成员数量
+const getFamilyMemberNum = () => {
+  let homeSerialNumber = getLocalStorage("user").homeSerialNumber;
+  if (homeSerialNumber == null) {
+    return;
+  }
+  axios.getRequest("/account/getFamilyMemberNum/" + homeSerialNumber).then((res) => {
+    familyMemberNum.value = res.data;
+  }).catch((err) => {
+    console.log(err);
+  });
+}
 
 onMounted(() => {
   authStore.websocket.onmessage = (e) => {
@@ -453,10 +763,19 @@ onMounted(() => {
     const data = JSON.parse(e.data);
     authStore.user = data;
     // 等请求数据完成再渲染图表
-    Promise.all([getIncomeData(), getExpenseData(), getFixedData(), getFluidData()]).then(() => {
+    Promise.all([getIncomeData(), getExpenseData(), getFixedData(), getFluidData(), getFamilyMemberNum(), getFinancialDataByTimeRange()]).then(() => {
+      //由expenseData和incomeData计算出totalAssetValue、fixedAssetValue、fluidAssetValue
+      fixedAssetValue.value = fixedData.value.reduce((total, item) => total + item.value, 0);
+      fluidAssetValue.value = fluidData.value.reduce((total, item) => total + item.value, 0);
+      totalAssetValue.value = fixedAssetValue.value + fluidAssetValue.value;
+      //由financeData计算出totalIncome、totalExpenditure、balance
+      totalIncome.value = financeData.value.reduce((total, item) => total + item.income, 0);
+      totalExpenditure.value = financeData.value.reduce((total, item) => total + item.expenditure, 0);
+      balance.value = totalIncome.value - totalExpenditure.value;
       renderChart1();
       renderChart2();
       renderChart3();
+      drawFinanceChart();
     }).then(() => {
       //监听chart1、chart2、chart3尺寸变化，重绘图表
       resizeObserver = new ResizeObserver(() => {
@@ -474,10 +793,19 @@ onMounted(() => {
     });
   }
   // 等请求数据完成再渲染图表
-  Promise.all([getIncomeData(), getExpenseData(), getFixedData(), getFluidData()]).then(() => {
+  Promise.all([getIncomeData(), getExpenseData(), getFixedData(), getFluidData(), getFamilyMemberNum(), getFinancialDataByTimeRange()]).then(() => {
+    //由expenseData和incomeData计算出totalAssetValue、fixedAssetValue、fluidAssetValue
+    fixedAssetValue.value = fixedData.value.reduce((total, item) => total + item.value, 0);
+    fluidAssetValue.value = fluidData.value.reduce((total, item) => total + item.value, 0);
+    totalAssetValue.value = fixedAssetValue.value + fluidAssetValue.value;
+    //由financeData计算出totalIncome、totalExpenditure、balance
+    totalIncome.value = financeData.value.reduce((total, item) => total + item.income, 0);
+    totalExpenditure.value = financeData.value.reduce((total, item) => total + item.expenditure, 0);
+    balance.value = totalIncome.value - totalExpenditure.value;
     renderChart1();
     renderChart2();
     renderChart3();
+    drawFinanceChart();
   }).then(() => {
     //监听chart1、chart2、chart3尺寸变化，重绘图表
     resizeObserver = new ResizeObserver(() => {
@@ -494,6 +822,7 @@ onMounted(() => {
 
   });
 });
+
 onBeforeUnmount(() => {
   resizeObserver.disconnect();
 });
@@ -561,5 +890,18 @@ onBeforeUnmount(() => {
   color: #409eff;
   font-size: 1.3em;
   margin-left: 10px;
+}
+
+.notice:hover {
+  color: #66b1ff;
+}
+
+.text {
+  font-size: 1.3em;
+  margin-left: 10px;
+}
+
+.item {
+  margin: 10px;
 }
 </style>
