@@ -133,7 +133,7 @@
       </el-col>
       <!-- 指定时间段的收支图 -->
       <el-col :span="24" :xs="24">
-        <div ref="chart4" style="height: 500px"></div>
+        <div ref="chart4" style="height: 400px"></div>
       </el-col>
     </el-row>
   </div>

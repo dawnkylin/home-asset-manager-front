@@ -37,7 +37,9 @@ router.beforeEach((to, from, next) => {
         next({ name: "login" });
       } else {
         useAuthStore().user = getLocalStorage("user");
-        useAuthStore().connectWebSocket();
+        if (useAuthStore().websocket == null) {
+          useAuthStore().connectWebSocket();
+        }
         //每次跳转重新获取用户信息
         // axios.getRequest("/account/getAccountDetail/" + getLocalStorage("user").id).then((res) => {
         //   if (res.code === 200) {
@@ -53,7 +55,9 @@ router.beforeEach((to, from, next) => {
     axios.getRequest("/auth/isLogin").then((res) => {
       if (res.success) {
         useAuthStore().user = getLocalStorage("user");
-        useAuthStore().connectWebSocket();
+        if (useAuthStore().websocket == null) {
+          useAuthStore().connectWebSocket();
+        }
         //每次跳转重新获取用户信息
         // axios.getRequest("/account/getAccountDetail/" + getLocalStorage("user").id).then((res) => {
         //   if (res.code === 200) {

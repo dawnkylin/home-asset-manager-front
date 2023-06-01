@@ -18,7 +18,7 @@
       fontSize: '16px'
     }">
     </el-table-column>
-    <el-table-column prop="createdDate" label="创建时间" width="200" :header-cell-style="{
+    <el-table-column prop="createdDate" label="创建时间" min-width="200" :header-cell-style="{
       backgroundColor: '#F5F7FA',
       color: '#909399',
       textAlign: 'center',
@@ -85,7 +85,7 @@ const addSystemNoticeDialogVisible = ref(false);
 const addSystemNoticeForm = ref({
   id:"",
   content: "",
-  createdDate:""
+  createdDate: "",
 });
 
 const editSystemNoticeDialogVisible = ref(false);

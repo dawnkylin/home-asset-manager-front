@@ -42,13 +42,13 @@
     <el-table v-show="!isCard" :data="tableData" v-loading="loading" stripe border
       @selection-change="handleSelectionChange" :header-cell-style="{ background: '#1C1C1C', color: 'white' }">
       <el-table-column type="selection" width="55" />
-      <el-table-column prop="name" label="名称" show-overflow-tooltip width="130"></el-table-column>
-      <el-table-column prop="amount" label="金额" sortable show-overflow-tooltip width="120"></el-table-column>
+      <el-table-column prop="name" label="名称" show-overflow-tooltip width="110"></el-table-column>
+      <el-table-column prop="amount" label="金额" sortable show-overflow-tooltip width="100"></el-table-column>
       <el-table-column prop="createdDate" label="记录日期" sortable show-overflow-tooltip width="150"></el-table-column>
-      <el-table-column prop="userName" label="创建者" show-overflow-tooltip width="120"></el-table-column>
+      <el-table-column prop="userName" label="创建者" show-overflow-tooltip width="110"></el-table-column>
       <el-table-column prop="notes" label="备注" show-overflow-tooltip min-width="200"></el-table-column>
       <el-table-column prop="assetSerialNumber" label="关联资产序列号" show-overflow-tooltip width="200"></el-table-column>
-      <el-table-column label="操作" show-overflow-tooltip width="200">
+      <el-table-column label="操作" show-overflow-tooltip min-width="170">
         <template #default="{ row }">
           <el-button type="primary" round @click="handleEdit(row)">编辑</el-button>
           <el-popconfirm title="确定删除该记录吗？" @confirm="handleDelete(row)">

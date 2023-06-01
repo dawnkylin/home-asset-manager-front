@@ -404,9 +404,9 @@ const tabChange = (tabName) => {
   }
   else if (tabName === "fourth") {
     getJoinNoticeData();
-    if (authStore.user.homeSerialNumber != null) {
-      return;
-    }
+    // if (authStore.user.homeSerialNumber != null) {
+    //   return;
+    // }
     //没有家庭才能发起加入请求
     getVerifyNoticeData();
   }
@@ -575,6 +575,8 @@ const disbandHome = () => {
         ElMessage.success("解散成功");
         userInfo.value.homeSerialNumber = null;
         setLocalStorage('user', userInfo.value);
+        joinNoticeData.value = [];
+        isCreator.value = false;
       }
       else {
         ElMessage.error(res.message);
