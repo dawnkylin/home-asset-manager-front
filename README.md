@@ -1,155 +1,100 @@
-# 家庭资产管家前端项目技术介绍
+# 项目简介
 
-## 项目介绍
+该项目为作者本科毕设项目。家庭资产管家主要实现对家庭资产、财务的管理，其次实现了用户的登陆注册、家庭管理、通知管理和系统公告管理。
 
-家庭资产管家前端项目是一个基于Vue.js的前后端分离的家庭资产管理系统，前端项目使用Vue3+Element-plus+VueRouter+Pinia+Axios+Webpack5等技术。
+项目技术架构如下图所示：
 
-## 项目结构
+![在这里插入图片描述](https://img-blog.csdnimg.cn/6c2dfe441f0540ee8cf975d9b885034d.png)
 
-```bash
-├── dist # 打包后的文件
-├── public # 静态资源
-├── src # 源代码
-│   ├── assets # 静态资源
-│   ├── components # 公共组件
-│   ├── router # 路由
-│   ├── stores # pinia
-│   ├── utils # 工具类
-│   ├── views # 页面
-│   ├── App.vue # 入口页面
-│   ├── main.js # 入口文件
-├── .env # 环境变量
-├── .env.development # 开发环境变量
-├── .env.production # 生产环境变量
-```
+[前端项目地址😍](https://github.com/Shadow-Kylin/home-asset-manager-front) [后端项目地址😍](https://github.com/Shadow-Kylin/home-asset-manager)
 
-## 项目运行
+# 项目启动说明
 
-```bash
-# 克隆项目
-git clone
+后端项目：
 
-# 进入项目目录
-cd
+- 在`application.properties`文件中设置了多个环境变量，可按需赋值。
+- 运行`RunRedis.bat`文件可启动Redis。
 
-# 安装依赖
-npm install
+前端项目：
 
-# 启动服务
-npm run dev
-```
+- 
 
-## 项目打包
+# 功能模块
 
-```bash
-# 打包生产环境
-npm run build
-```
+## 资产管理
 
-## 项目部署
+资产管理功能模块如下：
 
-```bash
-# 安装pm2
-npm install pm2 -g
+![在这里插入图片描述](https://img-blog.csdnimg.cn/381a5db30d514c95b5116f46bbc5d62d.png)
 
-# 启动项目
-pm2 start npm --name "家庭资产管家前端项目" -- run start
+页面截图如下所示：
 
-# 查看项目状态
-pm2 status
+表格形式
 
-# 停止项目
-pm2 stop 家庭资产管家前端项目
+![image-20230706211458356](C:\Users\20861\AppData\Roaming\Typora\typora-user-images\image-20230706211458356.png)
 
-# 重启项目
-pm2 restart 家庭资产管家前端项目
+卡片形式：
 
-# 删除项目
-pm2 delete 家庭资产管家前端项目
-```
-> pm2的使用请参考[pm2官网](https://pm2.keymetrics.io/)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/c03563e37e624c67879394860e19ee11.png)
 
-## 项目截图
+## 财务管理
 
-## 项目功能
+财务管理功能模块如下：
 
-1、登录、注册、发送验证码、修改密码、忘记密码、退出登录
+![在这里插入图片描述](https://img-blog.csdnimg.cn/8a059891479d4c51a1fad0baec2177f2.png)
 
-2、家庭资产管理-资产列表、资产详情、添加资产、修改资产、删除资产、批量删除资产、导出资产、导入资产、复制资产序列号、修改资产分类
+页面截图如下所示：
 
-3、家庭财务管理-财务列表、财务详情、添加财务、修改财务、删除财务、批量删除财务、导出财务、导入财务、复制财务序列号、修改财务分类
+表格形式：
 
-4、家庭成员管理-成员列表、删除成员
+![在这里插入图片描述](https://img-blog.csdnimg.cn/70bae35063bd41498b2ca6cf45b505b3.png)
 
-5、家庭管理-修改家庭信息、创建家庭、加入家庭、退出家庭、解散家庭
+卡片形式
 
-6、个人信息管理-修改个人信息、修改密码
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2cf261c257e44635a05132bd78caf96d.png)
 
-# 家庭资产管理前端项目开发记录
+## 资产、财务统计分析
 
-1、家庭创建者才显示家庭成员管理的删除按钮，并且不可删除自己
+资产、财务统计分析功能模块如下：
 
-2、家庭成员管理的删除按钮，点击后，弹出确认框，确认后，删除家庭成员
+![在这里插入图片描述](https://img-blog.csdnimg.cn/d7bfcc5ae6f647f78f71692b46958428.png)
 
-3、修改密码时先验证旧密码是否正确，再看新旧密码是否相同
+页面截图：
 
-4、个人信息的手机号、家庭序列号、注册时间皆不可修改
+总资产统计
 
-5、注册密码使用强密码验证
+![在这里插入图片描述](https://img-blog.csdnimg.cn/1b65fc554f654201bde7d6f004ebec4d.png)
 
-6、发布使用https协议，测试时使用http协议
+分类资产分析
 
-7、数据备份使用阿里云OSS
+![在这里插入图片描述](https://img-blog.csdnimg.cn/0ad1816b15f0479baaf5a14403abd543.png)
 
-8、漏洞扫描使用阿里云安全中心
+月收支分析
 
-9、使用阿里云CDN加速
+![在这里插入图片描述](https://img-blog.csdnimg.cn/09ce720f1d1b4ae19fd633d47f7fab3f.png)
 
-10、使用阿里云云盾DDoS防护
+总收支统计
 
-11、可以使用卡片或者表格展示数据
+![在这里插入图片描述](https://img-blog.csdnimg.cn/04999a39d41149f48892aa02d5d24795.png)
 
-12、可以使用图表展示数据
+日收支分析
 
-13、可以导入、导出数据
+![在这里插入图片描述](https://img-blog.csdnimg.cn/c0866aab1da041d184233b7f91e26913.png)
 
-14、gson日期格式问题，它返回MM d, yyyy或者MMM d, yyyy，前端需要转换成yyyy-MM-dd，使用moment.js处理后，转换成yyyy-MM-dd，将其返回，后端再转换成Date类型，gson报错，故对gson使用自定义日期格式，使用yyyy-MM-dd HH:mm:ss
+## 登陆注册模块
 
-15、使用lodash的防抖函数，解决echarts图表的resize问题导致的页面不流畅
+![在这里插入图片描述](https://img-blog.csdnimg.cn/401e45af898b4594bf8f6df897521742.png)
 
-16、dialog中的form表单按回车键，提交表单，使用prevent修饰符阻止该行为
+![在这里插入图片描述](https://img-blog.csdnimg.cn/3914de25f3cd459cbcb52c6d3f8c9506.png)
 
-17、el-table的min-width小于等于其他列的width时，出现resize的bug，解决办法：将min-width设置为大于其他width的值
+## 系统公告管理
 
-# Alibaba Cloud Linux的相关安装
+![在这里插入图片描述](https://img-blog.csdnimg.cn/b7a0038f147a47cf81cab9c41a2446b0.png)
 
-确切版本：Alibaba Cloud Linux  3.2104 LTS 64位
+## 个人信息管理
 
-安装redis
+![在这里插入图片描述](https://img-blog.csdnimg.cn/28eb4617cffc4c4fb3735de1d2f03fdb.png)
 
-```shell
-sudo yum install gcc make wget
-# 下载redis
-wget http://download.redis.io/releases/redis-6.2.6.tar.gz
-# 解压redis包
-tar xzf redis-6.2.6.tar.gz
-# 进入redis目录，编译redis
-cd redis-6.2.6
-make
-# 安装redis
-sudo make install
-# 启动redis作为后台服务
-redis-server &
-# 查看redis进程
-ps -ef | grep redis
-# 查看redis是否启动
-redis-cli ping
-# 如果返回PONG，说明redis启动成功
-# 关闭redis保护模式
-redis-cli config set protected-mode no
-# 关闭redis
-redis-cli shutdown
-```
-# 权限管理
+页面截图
 
-使用pinia存储用户角色信息，使用vue-router的beforeEach钩子函数，判断用户角色
+![在这里插入图片描述](https://img-blog.csdnimg.cn/4e474ba59b304727a855072f35aafa36.png)
